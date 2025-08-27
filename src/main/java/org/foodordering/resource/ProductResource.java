@@ -1,39 +1,77 @@
 package org.foodordering.resource;
 
+import org.foodordering.common.AbstractResource;
 import org.foodordering.domain.Product;
+import org.foodordering.service.*;
 
 import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
-import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.List;
 
-import static org.foodordering.service.Product_DB.*;
-
-
-@Path("/products")
-public class ProductResource {
-    @POST
-    @Consumes(MediaType.APPLICATION_JSON)
-    public Response addProduct(Product product) throws SQLException {
-        postProducts(product);
-        return Response.status(Response.Status.CREATED).entity(product).build();
-
-    }
+@Path("/Product")
+public class ProductResource extends AbstractResource {
+    ProductService productService = new ProductServiceImpl();
+    StoreService storeService = new StoreServiceImpl();
+    CategoriesService categoriesService = new CategoriesServiceImpl();
     @GET
     @Produces(MediaType.APPLICATION_JSON)
-    public Response getProducts() throws SQLException {
-        return  Response.status(Response.Status.OK).entity(getAllProducts()).build();
+    public Response getProducts() throws Exception{
+        List<Product> products =new ArrayList<>(productService.getAllProducts());
+        return Response.ok(gson().toJson(products)).build();
+    }
+    @POST
+    @Path("/insert")
+    @Consumes(MediaType.APPLICATION_JSON)
+    @Produces(MediaType.APPLICATION_JSON)
+    public Response addProduct(String payload) throws Exception{
+        Product product = gson().fromJson(payload,Product.class);
+        product.setId( product.getId());
+        product.setName( product.getName());
+        product.setDescription( product.getDescription());
+        product.setPrice(product.getPrice());
+        product.setStock_quantity(product.getStock_quantity());
+        product.setStore_id(product.getStore_id());
+        product.setStore(storeService.getStoreById((product.getStore_id())));
+        product.setCategory_id(product.getCategory_id());
+        product.setCategory( categoriesService.getCategoryById(product.getCategory_id()));
+        productService.addProduct(product);
+        return Response.ok(gson().toJson(product)).build();
     }
     @PUT
+    @Path("/{id}/update")
     @Consumes(MediaType.APPLICATION_JSON)
-    public Response putProduct(Product product) throws SQLException {
-        return Response.status(Response.Status.CREATED).entity(updateProduct(product)).build();
+    @Produces(MediaType.APPLICATION_JSON)
+    public Response updateProduct(@PathParam("id") int id ,String payload) throws Exception{
+        Product product = gson().fromJson(payload,Product.class);
+        product.setId( product.getId());
+        product.setName( product.getName());
+        product.setDescription( product.getDescription());
+        product.setPrice(product.getPrice());
+        product.setStock_quantity(product.getStock_quantity());
+        product.setStore_id(product.getStore_id());
+        product.setStore(storeService.getStoreById(product.getStore_id()));
+        product.setCategory_id(product.getCategory_id());
+        product.setCategory( categoriesService.getCategoryById(product.getCategory_id()));
+        productService.updateProduct(product);
+        return Response.ok(gson().toJson(product)).build();
     }
     @DELETE
+    @Path("/Products/delete")
     @Consumes(MediaType.APPLICATION_JSON)
-    public Response deleteProducts(Product product) throws SQLException {
-        deleteProduct(product.getId());
-        return Response.status(Response.Status.OK).build();
+    public Response deleteProduct(Product product) throws Exception{
+        productService.deleteProduct(product);
+        return Response.ok().build();
     }
+    @GET
+    @Path("/search")
+    @Produces(MediaType.APPLICATION_JSON)
+    public Response getProducts(@QueryParam("name") String name) throws Exception{
+        return Response.ok(gson().toJson(productService.getProductByName(name))).build();
+    }
+
+
+
 
 }

@@ -1,31 +1,27 @@
 package org.foodordering.domain;
 
-import javax.imageio.ImageIO;
-import java.awt.*;
-import java.awt.image.BufferedImage;
-import java.io.ByteArrayInputStream;
-import java.io.IOException;
+import com.google.gson.annotations.SerializedName;
+import org.foodordering.common.AbstractEntity;
 import java.math.BigDecimal;
-import java.util.Base64;
 
-public class Product {
-    private int id;
+
+public class Product extends AbstractEntity {
+    @SerializedName("product_name")
     private String name;
+    @SerializedName("product_description")
     private String description;
+    @SerializedName("product_price")
     private BigDecimal price;
+    @SerializedName("product_stock_quantity")
     private int stock_quantity;
+    @SerializedName("s_id")
     private int store_id;
     private Store store;
+    @SerializedName("ctgr_id")
     private int category_id;
     private Category category;
+    @SerializedName("product_image")
     private String image;
-
-
-
-
-    public void setImageFromString(String image_string) {
-
-    }
 
     public int getStore_id() {
         return store_id;
@@ -70,12 +66,28 @@ public class Product {
     public Product() {
     }
 
-    public int getId() {
-        return id;
-    }
+    @Override
+    public String validate() {
+        if (name == null || name.isEmpty()) {
+            return "Name is required";
+        }
+        if (description == null || description.isEmpty()) {
+            return "Description is required";
+        }
+        if (price == null) {
+            return "Price is required";
+        }
+        if (stock_quantity <= 0) {
+            return "Stock quantity is required";
+        }
+        if (category_id == 0) {
+            return "Category id is required";
+        }
+        if(store_id == 0) {
+            return "Store id is required";
+        }
 
-    public void setId(int id) {
-        this.id = id;
+        return null;
     }
 
     public String getName() {
@@ -110,4 +122,8 @@ public class Product {
         this.image = image;
     }
 
+    @Override
+    public String toString() {
+        return "Product ={ id= " + getId() + " name=" + name + " desciption= " + description + " store_id= " + store_id + " category_id= " + category_id + " image= " + image + " }";
+    }
 }

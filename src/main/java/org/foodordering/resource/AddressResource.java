@@ -1,56 +1,65 @@
 package org.foodordering.resource;
 
-import org.foodordering.domain.Addresses;
+import org.foodordering.common.AbstractResource;
+import org.foodordering.domain.Address;
+import org.foodordering.service.AddressService;
+import org.foodordering.service.AddressServiceImpl;
 
 import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
-import java.sql.SQLException;
+import java.util.List;
 
-import static org.foodordering.service.Address_DB.*;
-
-
-@Path("/Addresses")
-public class AddressResource {
+@Path("/Address")
+public class AddressResource extends AbstractResource {
+    AddressService addressService = new AddressServiceImpl();
     @POST
-    @Produces(MediaType.APPLICATION_JSON)
+    @Path("/insert")
     @Consumes(MediaType.APPLICATION_JSON)
-    public Response addAddress(Addresses address) throws SQLException {
-        try {
-            Class.forName("com.mysql.cj.jdbc.Driver");
-        } catch (ClassNotFoundException e) {
-            throw new RuntimeException(e);
-        }
-        saveAddress(address);
-        return Response.status(Response.Status.OK).entity(address).build();
+    @Produces(MediaType.APPLICATION_JSON)
+    public Response postAddress(String payload) throws Exception {
+    Address address = gson().fromJson(payload, Address.class);
+    address.setId(address.getId());
+    address.setCustomer_id(address.getCustomer_id());
+    address.setAddress_line(address.getAddress_line());
+    address.setCity(address.getCity());
+    address.setZip(address.getZip());
+    addressService.addAddress(address);
+    return Response.ok(gson().toJson(address)).build();
     }
     @GET
     @Produces(MediaType.APPLICATION_JSON)
-    public Response getAddresses() throws SQLException {
-       return Response.status(Response.Status.OK).entity(getAllAddresses()).build();
+    public Response getAddresses() throws Exception {
+        List<Address> addresses = addressService.getAddresses();
+        return Response.ok(gson().toJson(addresses)).build();
     }
     @PUT
+    @Path("/{id}/update")
+    @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
-    public Response putAddress(Addresses address) throws SQLException {
-        updateAddress(address);
-        return Response.status(Response.Status.OK).entity(address).build();
-
+    public Response putAddress(@PathParam("id") int id, String payload) throws Exception {
+        Address address = gson().fromJson(payload, Address.class);
+        address.setId(id);
+        address.setCustomer_id(address.getCustomer_id());
+        address.setAddress_line(address.getAddress_line());
+        address.setCity(address.getCity());
+        address.setZip(address.getZip());
+        addressService.updateAddress(address);
+        return Response.ok(gson().toJson(address)).build();
     }
     @DELETE
+    @Path("/delete")
     @Produces(MediaType.APPLICATION_JSON)
-    public Response deletedAddress(Addresses address) throws SQLException {
-        try {
-            Class.forName("com.mysql.cj.jdbc.Driver");
-        } catch (ClassNotFoundException e) {
-            throw new RuntimeException(e);
-        }
-        deleteAddress(address);
-        return Response.status(Response.Status.OK).entity(address).build();
+    public Response deleteAddress(Address address) throws Exception {
+        addressService.deleteAddress(address);
+        return Response.ok(gson().toJson(address)).build();
     }
     @GET
-    @Path("/{city}")
+    @Path("/{id}")
     @Produces(MediaType.APPLICATION_JSON)
-    public Response getAddress(@PathParam("city") String city) throws SQLException {
-        return Response.status(Response.Status.OK).entity(getAddressByCity(city)).build();
+    public Response getAddress(@PathParam("id") int id) throws Exception {
+        Address address=addressService.getAddressById(id);
+        return Response.ok(gson().toJson(address)).build();
     }
+
 }

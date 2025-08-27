@@ -1,61 +1,77 @@
 package org.foodordering.resource;
 
-import com.google.gson.Gson;
+
+import org.foodordering.common.AbstractResource;
+import org.foodordering.domain.Category;
 import org.foodordering.domain.Store;
 
 import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
-import java.sql.*;
-import java.util.ArrayList;
 import java.util.List;
 
+import org.foodordering.service.StoreServiceImpl;
 
-import static org.foodordering.service.Store_DB.*;
+
 @Path("/Stores")
-public class StoreResource {
-    Gson gson = new Gson();
+public class StoreResource extends AbstractResource {
+
+    StoreServiceImpl storeService = new StoreServiceImpl();
     @GET
     @Produces(MediaType.APPLICATION_JSON)
-    public Response getStores() throws SQLException {
-        try {
-            Class.forName("com.mysql.cj.jdbc.Driver");
-        } catch (ClassNotFoundException e) {
-            throw new RuntimeException(e);}
-        List<Store> stores = new ArrayList<>(getAllStores());
-        return Response.status(Response.Status.OK).entity(gson.toJson(stores)).build();
+    public Response getStores() throws Exception {
+            List<Store> stores = storeService.getAllStores();
+            return Response.ok(gson().toJson(stores)).build();
+
     }
     @POST
+    @Path("/insert")
     @Consumes(MediaType.APPLICATION_JSON)
-    public Response postStore(Store store) throws SQLException {
-        try {
-            Class.forName("com.mysql.cj.jdbc.Driver");
-        } catch (ClassNotFoundException e) {
-            throw new RuntimeException(e);}
-        saveStoredb(store);
-        return Response.status(Response.Status.CREATED).entity(gson.toJson(store)).build();
+    @Produces(MediaType.APPLICATION_JSON)
+    public Response postStore(String payload) throws Exception {
+     Store store = gson().fromJson(payload,Store.class);
+     store.setId(store.getId());
+     store.setName(store.getName());
+     store.setAddress(store.getAddress());
+     store.setContact(store.getContact());
+     store.setDelivery_options(store.getDelivery_options());
+     store.setOpens(store.getOpens());
+     store.setCloses(store.getCloses());
+     storeService.addStore(store);
+     return Response.ok(gson().toJson(store)).build();
+
     }
     @DELETE
+    @Path("/delete")
     @Produces(MediaType.APPLICATION_JSON)
-    public Response deleteStore(Store store) throws SQLException {
-        try {
-            Class.forName("com.mysql.cj.jdbc.Driver");
-        } catch (ClassNotFoundException e) {
-            throw new RuntimeException(e);
-        }
-        deleteStoredb(store);
-        return Response.status(Response.Status.OK).entity(gson.toJson(store)).build();
+    public Response deleteStore(Store store) throws Exception {
+        storeService.deleteStore(store);
+        return Response.ok().build();
+
+
     }
     @PUT
+    @Path("/{id}/update")
     @Consumes(MediaType.APPLICATION_JSON)
-    public Response putStore(Store store) throws SQLException {
-        try {
-            Class.forName("com.mysql.cj.jdbc.Driver");
-        } catch (ClassNotFoundException e) {
-            throw new RuntimeException(e);
-        }
-        updateStore(store);
-        return Response.status(Response.Status.OK).entity(gson.toJson(store)).build();
+    @Produces(MediaType.APPLICATION_JSON)
+    public Response putStore(@PathParam("id") int id,String payload) throws Exception {
+        Store store = gson().fromJson(payload,Store.class);
+        store.setId(store.getId());
+        store.setName(store.getName());
+        store.setAddress(store.getAddress());
+        store.setContact(store.getContact());
+        store.setDelivery_options(store.getDelivery_options());
+        store.setOpens(store.getOpens());
+        store.setCloses(store.getCloses());
+        storeService.updateStore(store);
+        return Response.ok().build();
+    }
+    @GET
+    @Path("/{id}")
+    @Produces(MediaType.APPLICATION_JSON)
+    public Response getStore(@PathParam("id") int id) throws Exception {
+        Store n = storeService.getStoreById(id);
+        return Response.ok(gson().toJson(n)).build();
     }
 
 }

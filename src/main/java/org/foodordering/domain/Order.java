@@ -1,16 +1,23 @@
 package org.foodordering.domain;
 
-import java.security.PrivateKey;
-import java.sql.Date;
+import com.google.gson.annotations.SerializedName;
+import org.foodordering.common.AbstractEntity;
 
-public class Order {
-    private int id;
-    private int amount;
+
+import java.math.BigDecimal;
+import java.sql.Date;
+public class Order extends AbstractEntity {
+    @SerializedName("order_amount")
+    private BigDecimal amount;
+    @SerializedName("order_date")
     private Date date;
+    @SerializedName("order_status")
     private String status;
+    @SerializedName("c_id")
     private int costumer_id;
+    private Customer customer;
+    @SerializedName("s_id")
     private int store_id;
-    private Costumer costumer;
     private Store store ;
 
     public Store getStore() {
@@ -21,12 +28,12 @@ public class Order {
         this.store = store;
     }
 
-    public Costumer getCostumer() {
-        return costumer;
+    public Customer getCustomer() {
+        return customer;
     }
 
-    public void setCostumer(Costumer costumer) {
-        this.costumer = costumer;
+    public void setCustomer(Customer customer) {
+        this.customer = customer;
     }
 
     public int getCostumer_id() {
@@ -49,19 +56,12 @@ public class Order {
 
     }
 
-    public int getId() {
-        return id;
-    }
 
-    public void setId(int id) {
-        this.id = id;
-    }
-
-    public int getAmount() {
+    public BigDecimal getAmount() {
         return amount;
     }
 
-    public void setAmount(int amount) {
+    public void setAmount(BigDecimal amount) {
         this.amount = amount;
     }
 
@@ -79,5 +79,30 @@ public class Order {
 
     public void setStatus(String status) {
         this.status = status;
+    }
+
+    @Override
+    public String validate() {
+        if(amount==null) {
+            return "Amount must not be zero";
+        }
+        if(date == null) {
+            return "Date must not be zero";
+        }
+        if(status == null || status.isEmpty()) {
+            return "Status must not be zero";
+        }
+        if(costumer_id == 0) {
+            return "Customer id must not be zero";
+        }
+        if(store_id == 0) {
+            return "Store id must not be zero";
+        }
+        return null;
+    }
+
+    @Override
+    public String toString() {
+        return  "Order{ id = "+ getId() +" amount="+ amount + " status="+status+" date="+date+"store_id"+store_id+" store="+store+"customer_id"+costumer_id+" customer="+customer+" }";
     }
 }
