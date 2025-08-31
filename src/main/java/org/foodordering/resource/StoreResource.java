@@ -3,6 +3,7 @@ package org.foodordering.resource;
 
 import org.foodordering.common.AbstractResource;
 import org.foodordering.domain.Category;
+import org.foodordering.domain.Order;
 import org.foodordering.domain.Store;
 
 import javax.ws.rs.*;
@@ -10,6 +11,8 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import java.util.List;
 
+import org.foodordering.service.OrderService;
+import org.foodordering.service.OrderServiceImpl;
 import org.foodordering.service.StoreServiceImpl;
 
 
@@ -73,5 +76,15 @@ public class StoreResource extends AbstractResource {
         Store n = storeService.getStoreById(id);
         return Response.ok(gson().toJson(n)).build();
     }
+
+    @GET
+    @Path("/dashboard/{id}")
+    @Produces(MediaType.APPLICATION_JSON)
+    public Response getStoreDashboard(@PathParam("id") int id) throws Exception {
+        OrderService orderService = new OrderServiceImpl();
+        List<Order> ordersByStore =orderService.ordersByStore(id);
+        return Response.ok(gson().toJson(ordersByStore)).build();
+    }
+
 
 }

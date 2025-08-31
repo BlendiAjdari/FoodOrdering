@@ -23,8 +23,8 @@ public class OrderResource extends AbstractResource {
     public Response insertOrder(String payload) throws Exception {
         Order order = gson().fromJson(payload, Order.class);
         order.setId(order.getId());
-        order.setAmount(order.getAmount());
         order.setDate(order.getDate());
+        order.setAmount(order.getAmount());
         order.setStatus(order.getStatus());
         order.setCostumer_id(order.getCostumer_id());
         CustomerServiceImpl  customerService = new CustomerServiceImpl();
@@ -42,8 +42,15 @@ public class OrderResource extends AbstractResource {
         return Response.ok(gson().toJson(orders)).build();
     }
     @DELETE
+    @Path("/delete/{customer_id}")
+    @Consumes(MediaType.APPLICATION_JSON)
+    public Response deleteOrderByCustomerId(@PathParam("customer_id")int customer_id) throws Exception {
+        orderService.deleteOrderByCustomerId(customer_id);
+        return Response.ok().build();
+    }
+    @DELETE
     @Path("/delete")
-    @Produces(MediaType.APPLICATION_JSON)
+    @Consumes(MediaType.APPLICATION_JSON)
     public Response deleteOrder(Order order) throws Exception {
         orderService.deleteOrder(order);
         return Response.ok().build();
@@ -55,7 +62,6 @@ public class OrderResource extends AbstractResource {
     public Response updateOrder(@PathParam("id") int id, String payload) throws Exception {
         Order order = gson().fromJson(payload, Order.class);
         order.setId(order.getId());
-        order.setAmount(order.getAmount());
         order.setDate(order.getDate());
         order.setStatus(order.getStatus());
         order.setCostumer_id(order.getCostumer_id());

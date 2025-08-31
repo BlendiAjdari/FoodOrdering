@@ -1,20 +1,33 @@
 package org.foodordering.resource;
 
 import org.foodordering.common.AbstractResource;
+import org.foodordering.domain.Card;
+import org.foodordering.domain.Encryption;
+import org.foodordering.domain.Ewallet;
 import org.foodordering.domain.Payment;
-import org.foodordering.service.PaymentService;
-import org.foodordering.service.PaymentServiceImpl;
+import org.foodordering.service.*;
+import org.glassfish.jersey.server.Uri;
 
 
 import javax.ws.rs.*;
+import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
+import javax.ws.rs.core.UriInfo;
+import java.math.BigDecimal;
+import java.net.URI;
+import java.sql.Date;
+import java.sql.Time;
+import java.time.LocalDate;
+import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.List;
 
 @Path("/Payment")
 public class PaymentResource extends AbstractResource {
     PaymentService paymentService= new PaymentServiceImpl();
+    CardService cardService= new CardServiceImpl();
+    OrderService orderService= new OrderServiceImpl();
     @GET
     @Produces(MediaType.APPLICATION_JSON)
     public Response getPayment() throws Exception {
@@ -22,19 +35,98 @@ public class PaymentResource extends AbstractResource {
         return Response.ok(gson().toJson(payments)).build();
 
     }
+    @Context
+    UriInfo uriInfo;
     @POST
     @Path("/insert")
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
-    public Response createPayment(String payload) throws Exception {
-        Payment payment = gson().fromJson(payload, Payment.class);
-        payment.setId(payment.getId());
-        payment.setOrder_id(payment.getOrder_id());
-        payment.setAmount(payment.getAmount());
-        payment.setStatus(payment.getStatus());
-        payment.setDate(payment.getDate());
-        paymentService.addPayment(payment);
-        return Response.ok(gson().toJson(payment)).build();
+    public Response createPayment(@QueryParam("method") String method, String payload) throws Exception {
+        if(method.equals("Cash")){
+            Payment payment = gson().fromJson(payload, Payment.class);
+            payment.setId(payment.getId());
+            payment.setCustomerId(payment.getCustomerId());
+            BigDecimal totalAmount = orderService.orderAmountByCustomerId(payment.getCustomerId());
+            payment.setAmount(totalAmount.add(totalAmount.multiply(BigDecimal.valueOf(0.18))));//taksa
+            payment.setMethod(method);
+            payment.setStatus(payment.getStatus());
+            payment.setOrders(orderService.getOrdersByCustomerId(payment.getCustomerId()));
+            payment.setDate(Date.valueOf(LocalDate.now()));
+            paymentService.addPayment(payment);
+        return Response.ok(gson().toJson(payment)).build();}
+
+        if(method.equals("Card")) {
+            Payment payment = gson().fromJson(payload, Payment.class);
+            payment.setId(payment.getId());
+            payment.setCustomerId(payment.getCustomerId());
+            payment.setCard_id(payment.getCard_id());
+            BigDecimal totalAmount = orderService.orderAmountByCustomerId(payment.getCustomerId());
+            payment.setAmount(totalAmount.add(totalAmount.multiply(BigDecimal.valueOf(0.18))));//taksa
+            payment.setMethod(method);
+            payment.setStatus(payment.getStatus());
+            payment.setOrders(orderService.getOrdersByCustomerId(payment.getCustomerId()));
+            payment.setDate(Date.valueOf(LocalDate.now()));
+            if(payment.getCard_id()!=0){
+
+
+            Card card1 = gson().fromJson(payload, Card.class);
+            card1.setCardNumber(card1.getCardNumber());
+            card1.setCardVerificationValue(card1.getCardVerificationValue());
+
+            Card card = cardService.getCardById(payment.getCard_id());
+            String n = Encryption.encrypt(card1.getCardNumber());
+            String n1 = Encryption.encrypt(card1.getCardVerificationValue());
+            if (n.equals(card.getCardNumber()) && n1.equals(card.getCardVerificationValue())) {
+                    paymentService.addPayment(payment);
+                    return Response.ok(gson().toJson(payment)).build();
+            } else {
+                    return Response.ok(gson().toJson("Wrong Credit Card Details!")).build();
+            }}
+            else {
+                throw new Exception("Card id cannot be empty");
+            }
+
+        }
+        if(method.equals("E-Wallet")){
+            Payment payment = gson().fromJson(payload, Payment.class);
+            payment.setId(payment.getId());
+            payment.setE_walletId(payment.getE_walletId());
+            payment.setCustomerId(payment.getCustomerId());
+            BigDecimal totalAmount = orderService.orderAmountByCustomerId(payment.getCustomerId());
+            payment.setAmount(totalAmount.add(totalAmount.multiply(BigDecimal.valueOf(0.18))));//taksa
+            payment.setMethod(method);
+            payment.setStatus(payment.getStatus());
+            payment.setOrders(orderService.getOrdersByCustomerId(payment.getCustomerId()));
+            payment.setDate(Date.valueOf(LocalDate.now()));
+
+            if(payment.getE_walletId()!=0){
+                Ewallet e = gson().fromJson(payload,Ewallet.class);
+                e.setPassword(e.getPassword());
+                e.setUsername(e.getUsername());
+
+
+                EwalletService ewalletService = new EwalletServiceImpl();
+                Ewallet eWallet = ewalletService.getEwallet(payment.getE_walletId());
+                String n = Encryption.encrypt(e.getUsername());
+                String n1 = Encryption.encrypt(e.getPassword());
+
+                if(n.equals(eWallet.getUsername()) && n1.equals(eWallet.getPassword())) {
+                    payment.setCard_id(eWallet.getCard_id());
+                    paymentService.addPayment(payment);
+                    return Response.ok(gson().toJson(payment)).build();
+                }else{
+                    return Response.ok(gson().toJson("Wrong E-Wallet Details!")).build();
+                }
+            }else{
+                throw new Exception("Ewallet id cannot be empty");
+            }
+
+
+        }
+        else {
+            return Response.ok(gson().toJson("Payment method not allowed")).build();
+        }
+
     }
     @GET
     @Path("/{id}")
@@ -58,7 +150,8 @@ public class PaymentResource extends AbstractResource {
     public Response updatePayment(@PathParam("id") int id, String payload) throws Exception {
         Payment payment = gson().fromJson(payload, Payment.class);
         payment.setId(id);
-        payment.setOrder_id(payment.getOrder_id());
+        payment.setCustomerId(payment.getCustomerId());
+        payment.setCard_id(payment.getCard_id());
         payment.setAmount(payment.getAmount());
         payment.setMethod(payment.getMethod());
         payment.setStatus(payment.getStatus());
@@ -66,6 +159,7 @@ public class PaymentResource extends AbstractResource {
         paymentService.updatePayment(payment);
         return Response.ok(gson().toJson(payment)).build();
     }
+
 
 
 }

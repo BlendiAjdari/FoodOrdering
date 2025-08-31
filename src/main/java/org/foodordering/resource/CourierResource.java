@@ -13,7 +13,7 @@ import javax.ws.rs.core.Response;
 public class CourierResource extends AbstractResource {
     CourierService courierService = new CourierServiceImpl();
     @GET
-    @Consumes(MediaType.APPLICATION_JSON)
+    @Produces(MediaType.APPLICATION_JSON)
     public Response getCourier() throws Exception {
         return Response.ok(gson().toJson(courierService.getAllCouriers())).build();
     }

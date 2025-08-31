@@ -22,7 +22,7 @@ public class CheckoutResource extends AbstractResource {
    public Response insertCheckout(String payload) throws Exception{
        Checkout checkout = gson().fromJson(payload, Checkout.class);
        checkout.setId(checkout.getId());
-       checkout.setOrder_id(checkout.getOrder_id());
+       checkout.setCustomer_id(checkout.getCustomer_id());
        checkout.setAddress(checkout.getAddress());
        checkoutService.addCheckout(checkout);
        return Response.ok(gson().toJson(checkout)).build();
@@ -39,7 +39,7 @@ public class CheckoutResource extends AbstractResource {
    public Response updateCheckout(@PathParam("id") Integer id, String payload) throws Exception {
        Checkout checkout = gson().fromJson(payload, Checkout.class);
        checkout.setId(id);
-       checkout.setOrder_id(checkout.getOrder_id());
+       checkout.setCustomer_id(checkout.getCustomer_id());
        checkout.setAddress_id(checkout.getAddress_id());
        checkoutService.updateCheckout(checkout);
        return Response.ok(gson().toJson(checkout)).build();

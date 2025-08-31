@@ -3,30 +3,31 @@ package org.foodordering.domain;
 import org.foodordering.common.AbstractEntity;
 
 import java.sql.Time;
+import java.util.List;
 
 public class Delivery extends AbstractEntity {
-    private int order_id;
-    private Order order;
+    private int customer_id;
+    private List<Order> orders;
     private int courier_id;
     private Courier courier;
     private String status;
     private Time pickup_time;
     private Time delivery_time;
 
-    public int getOrder_id() {
-        return order_id;
+    public int getCustomer_id() {
+        return customer_id;
     }
 
-    public void setOrder_id(int order_id) {
-        this.order_id = order_id;
+    public void setCustomer_id(int customer_id) {
+        this.customer_id = customer_id;
     }
 
-    public Order getOrder() {
-        return order;
+    public List<Order> getOrders() {
+        return orders;
     }
 
-    public void setOrder(Order order) {
-        this.order = order;
+    public void setOrders(List<Order> orders) {
+        this.orders = orders;
     }
 
     public int getCourier_id() {
@@ -71,7 +72,7 @@ public class Delivery extends AbstractEntity {
 
     @Override
     public String validate() {
-        if(order_id ==0){
+        if(customer_id==0){
             return "order_id is null";
         }
         if(courier_id ==0){

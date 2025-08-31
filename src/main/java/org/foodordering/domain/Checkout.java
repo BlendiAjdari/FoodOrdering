@@ -3,16 +3,42 @@ package org.foodordering.domain;
 import com.google.gson.annotations.SerializedName;
 import org.foodordering.common.AbstractEntity;
 
+import java.math.BigDecimal;
 import java.util.List;
 
 public class Checkout extends AbstractEntity {
-    @SerializedName("o_id")
-    private int order_id;
-    private Order order;
+    @SerializedName("c_id")
+    private int customer_id;
+    private List<Order> orders;
     private List<OrderItem> orderItems;
     @SerializedName("a_id")
     private int Address_id;
     private Address address;
+    private BigDecimal totalAmount;
+
+    public List<Order> getOrders() {
+        return orders;
+    }
+
+    public void setOrders(List<Order> orders) {
+        this.orders = orders;
+    }
+
+    public int getCustomer_id() {
+        return customer_id;
+    }
+
+    public void setCustomer_id(int customer_id) {
+        this.customer_id = customer_id;
+    }
+
+    public BigDecimal getTotalAmount() {
+        return totalAmount;
+    }
+
+    public void setTotalAmount(BigDecimal totalAmount) {
+        this.totalAmount = totalAmount;
+    }
 
     public List<OrderItem> getOrderItems() {
         return orderItems;
@@ -24,21 +50,7 @@ public class Checkout extends AbstractEntity {
 
     public Checkout() {}
 
-    public int getOrder_id() {
-        return order_id;
-    }
 
-    public void setOrder_id(int order_id) {
-        this.order_id = order_id;
-    }
-
-    public Order getOrder() {
-        return order;
-    }
-
-    public void setOrder(Order order) {
-        this.order = order;
-    }
 
 
     public int getAddress_id() {
@@ -59,8 +71,8 @@ public class Checkout extends AbstractEntity {
 
     @Override
     public String validate() {
-        if(order_id == 0){
-            return "o_id is required";
+        if(customer_id == 0){
+            return "customer_id is required";
         }
         if(Address_id == 0){
             return "a_id is required";

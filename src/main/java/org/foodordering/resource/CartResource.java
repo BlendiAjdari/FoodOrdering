@@ -1,10 +1,7 @@
 package org.foodordering.resource;
 
 import org.foodordering.common.AbstractResource;
-import org.foodordering.domain.Cart;
-import org.foodordering.domain.CartItem;
-import org.foodordering.domain.Order;
-import org.foodordering.domain.Product;
+import org.foodordering.domain.*;
 import org.foodordering.service.*;
 
 import javax.ws.rs.*;
@@ -15,9 +12,13 @@ import javax.ws.rs.core.UriInfo;
 import java.math.BigDecimal;
 import java.net.URI;
 import java.sql.Date;
+import java.sql.Time;
 import java.time.LocalDate;
+import java.time.LocalTime;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 
 @Path("/cart")
@@ -31,7 +32,7 @@ public class CartResource extends AbstractResource {
     public Response createCart(String payload) throws Exception {
         Cart cart = gson().fromJson(payload, Cart.class);
         cart.setCustomer_id(cart.getCustomer_id());
-        cart.setCreated_at(cart.getCreated_at());
+        cart.setCreated_at(Time.valueOf(LocalTime.now()));
         cartService.addCart(cart);
         return  Response.ok().build();
     }
@@ -40,7 +41,7 @@ public class CartResource extends AbstractResource {
     @Produces(MediaType.APPLICATION_JSON)
     public Response getCart() throws Exception {
         List<Cart> carts = new ArrayList<>(cartService.getAllCarts());
-        return Response.ok(carts).build();
+        return Response.ok(gson().toJson(carts)).build();
     }
     @PUT
     @Path("/{id}/update")
@@ -65,28 +66,30 @@ public class CartResource extends AbstractResource {
     @Produces(MediaType.APPLICATION_JSON)
     public Response getCartById(@PathParam("id") int id) throws Exception {
         Cart cart = cartService.getCartById(id);
-        return Response.ok(cart).build();
+        return Response.ok(gson().toJson(cart)).build();
     }
     @GET
     @Path("/items")
     @Produces(MediaType.APPLICATION_JSON)
     public Response getCartItems() throws Exception {
         List<CartItem> items = new ArrayList<>(cartItemService.getAllCartItems());
-        return Response.ok(items).build();
+        return Response.ok(gson().toJson(items)).build();
     }
     @POST
     @Path("/items/insert")
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
     public Response insertCartItem(String Payload) throws Exception {
+        ProductService productService = new ProductServiceImpl();
         CartItem  item = gson().fromJson(Payload, CartItem.class);
         item.setId(item.getId());
         item.setCart_id(item.getCart_id());
         item.setProduct_id(item.getProduct_id());
         item.setQuantity(item.getQuantity());
+        item.setPrice(productService.getProductById(item.getProduct_id()).getPrice());
         cartItemService.addCartItem(item);
 
-        return  Response.ok(item).build();
+        return  Response.ok(gson().toJson(item)).build();
 
     }
     @DELETE
@@ -113,27 +116,18 @@ public class CartResource extends AbstractResource {
 
     UriInfo uriInfo;
 
-//    @GET
-//    @Path("/{id}/items/Order/")
-//    public Response redirectToOrder(@PathParam("id") int id) throws Exception {
-//        OrderService orderService = new OrderServiceImpl();
-//        CartService  cartService = new CartServiceImpl();
-//        CartItemService cartItemService = new CartItemServiceImpl();
-//        CartItem cartItem = cartItemService.getCartItemById(id);
-//        Cart cart = cartService.getCartById(id);
-//        Order order = new Order();
-//        order.setAmount(new BigDecimal(3));
-//        order.setDate(Date.valueOf(LocalDate.now()));
-//        order.setStatus("Preparing");
-//        order.setCostumer_id(cart.getCustomer_id());
-//        order.setStore_id(orderService.StoreIdFromProduct(product.getId()));
-//        orderService.addOrder(order);
-//        orderService.getOrderById(order.getId());
-//        String n = "/items/Order";
-//        if (n.equals("/items/Order")){
-//            URI uri = uriInfo.getBaseUriBuilder().path("Orders").path(String.valueOf(order.getId())).build();
-//            return Response.seeOther(uri).build();
-//        }return null;
-//    }
+    @GET
+    @Path("/{id}/finalise")
+    public Response redirectToCheckout(@PathParam("id") int id) throws Exception {
+        String n = "/"+id+"finalise";
+        if (n.equals("/"+id+"finalise")){
+
+            URI uri = uriInfo.getBaseUriBuilder().path("Checkout").path(String.valueOf(redirectToCheckout(id))).build();
+            return Response.seeOther(uri).build();
+        }return null;
+    }
+
+
+
 
 }

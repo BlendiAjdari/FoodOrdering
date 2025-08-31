@@ -1,9 +1,9 @@
 package org.foodordering.service;
 
 import org.foodordering.common.AbstractService;
+import org.foodordering.domain.Checkout;
 import org.foodordering.domain.Order;
 import org.foodordering.domain.OrderItem;
-import org.foodordering.domain.Product;
 
 import java.math.BigDecimal;
 import java.sql.*;
@@ -95,10 +95,12 @@ public class OrderServiceImpl extends AbstractService implements OrderService {
         PreparedStatement ps = null;
         Connection conn = null;
         try{
+            amountChange(order.getId());
             conn = getConnection();
             ps = conn.prepareStatement(Sql.DELETE_ORDER);
             ps.setInt(1, order.getId());
             ps.executeUpdate();
+
         }finally {
             close(ps, conn);
         }
@@ -164,11 +166,218 @@ public class OrderServiceImpl extends AbstractService implements OrderService {
             close(rs, ps, conn);
         }
     }
-    public int getTotalPrice(Product product, OrderItem orderItem) throws Exception {
-      BigDecimal price = BigDecimal.valueOf( product.getPrice().intValue() *orderItem.getQuantity());
-      return price.intValue();
+    @Override
+    public BigDecimal totalAmount(int id) throws Exception{
+        PreparedStatement ps = null;
+        ResultSet rs = null;
+        Connection conn = null;
+        try{
+            conn = getConnection();
+            ps = conn.prepareStatement(Sql.GET_ORDER_ITEM_FROM_ORDER_ID);
+            ps.setInt(1,id);
+
+            rs = ps.executeQuery();
+            if(rs.next()){
+
+
+                return new BigDecimal(rs.getInt("quantity")).multiply(rs.getBigDecimal("unit_price"));
+            }
+        }finally {
+            close(rs, ps, conn);
+        }return new BigDecimal(0);
+
     }
+    @Override
+    public void amountChange(int id) throws Exception{
+        PreparedStatement ps = null;
+        Connection conn = null;
+        ResultSet rs = null;
+        try {
+            conn= getConnection();
+            ps = conn.prepareStatement(Sql.UPDATE_AMOUNT);
+            ps.setBigDecimal(1,getAmount(id).add(totalAmount(id)));
+            ps.setInt(2,id);
+            ps.executeUpdate();
+        }finally {
+            close( ps, conn);
+        }
+    }
+    @Override
+    public BigDecimal getAmount(int id)throws Exception{
+        PreparedStatement ps=null;
+        Connection conn=null;
+        ResultSet rs=null;
+        try {
+            conn=getConnection();
+            ps = conn.prepareStatement(Sql.GET_AMOUNT);
+            ps.setInt(1, id);
+            rs=ps.executeQuery();
+            if(rs.next()){
+                if(rs.getBigDecimal("amount")==null){
+                    return BigDecimal.ZERO;
+                }else{
+                return rs.getBigDecimal("amount");}
+            }else {
+                return BigDecimal.ZERO;
+            }
+        }finally {
+            close(rs, ps, conn);
+        }
+
+    }
+    @Override
+    public void deleteAmount(int id) throws Exception{
+     PreparedStatement ps=null;
+     Connection conn=null;
+     try {  if(getAmount(id).subtract(totalAmount(id)).compareTo(BigDecimal.ZERO)<0){
+          throw new Exception("Amount can't be negative");
+     }else{
+            conn=getConnection();
+            ps = conn.prepareStatement(Sql.UPDATE_AMOUNT);
+            ps.setBigDecimal(1,(getAmount(id).subtract(totalAmount(id))));
+            ps.setInt(2,id);
+            ps.executeUpdate();}
+     }finally {
+         close( ps, conn);
+     }
+    }
+
+    @Override
+    public int lastOrderId() throws Exception {
+        PreparedStatement ps =null;
+        ResultSet rs=null;
+        Connection conn=null;
+        try {
+            conn=getConnection();
+            ps = conn.prepareStatement(Sql.GET_LAST_ORDER_ID);
+            rs=ps.executeQuery();
+            if(rs.next()){
+                return rs.getInt("id");
+            }
+        }finally {
+            close(rs, ps, conn);
+        }return 0;
+    }
+
+    @Override
+    public BigDecimal orderAmountByCustomerId(int id) throws Exception {
+        PreparedStatement ps = null;
+        Connection conn=null;
+        ResultSet rs = null;
+        try {
+            conn=getConnection();
+            ps = conn.prepareStatement(Sql.GET_AMOUNT_FROM_CUSTOMER_ID);
+            ps.setInt(1,id);
+            rs=ps.executeQuery();
+            BigDecimal amount = BigDecimal.ZERO;
+            while(rs.next()){
+                if(rs.getBigDecimal("amount")!=null){
+                    amount = rs.getBigDecimal("amount").add(amount);
+                }
+            }return amount;
+        }finally {
+            close(rs, ps, conn);
+        }
+    }
+
+    @Override
+    public void deleteOrderByCustomerId(int id) throws Exception {
+        PreparedStatement ps =null;
+        Connection conn=null;
+        CheckoutService checkoutService = new CheckoutServiceImpl();
+        OrderItemService orderItemService = new OrderItemServiceImpl();
+        try {
+            conn = getConnection();
+            orderItemService.deleteAllOrderItemsByOrderId(getOrdersByCustomerId(id));
+            PaymentService paymentService = new PaymentServiceImpl();
+            paymentService.deletePaymentByCustomerId(id);
+            checkoutService.deleteCheckoutByCustomerId(id);
+            ps = conn.prepareStatement(Sql.DELETE_ORDER_FROM_CUSTOMER_ID);
+            ps.setInt(1, id);
+            ps.executeUpdate();
+        } finally {
+            close(ps, conn);
+        }
+    }
+
+    @Override
+    public List<Order> getOrdersByCustomerId(int id) throws Exception {
+        PreparedStatement ps =null;
+        ResultSet rs = null;
+        Connection conn=null;
+        try {
+            conn=getConnection();
+            ps = conn.prepareStatement(Sql.GET_ORDERS_FROM_CUSTOMER_ID);
+            ps.setInt(1,id);
+            rs=ps.executeQuery();
+            List<Order> orders = new ArrayList<>();
+            while(rs.next()){
+                Order order = new Order();
+                order.setId(rs.getInt("id"));
+                order.setCostumer_id(rs.getInt("Costumers_id"));
+                order.setDate(rs.getDate("date"));
+                order.setStatus(rs.getString("status"));
+                order.setStore_id(rs.getInt("store_id"));
+                order.setAmount(rs.getBigDecimal("amount"));
+                orders.add(order);
+            }return orders;
+        }finally {
+            close(rs, ps, conn);
+        }
+
+    }
+
+    @Override
+    public List<Order> ordersByStore(int id) throws Exception {
+        PreparedStatement ps =null;
+        ResultSet rs = null;
+        Connection conn=null;
+        try {
+            conn=getConnection();
+            ps = conn.prepareStatement(Sql.GET_ORDERS_BY_STORE_ID);
+            ps.setInt(1,id);
+            rs=ps.executeQuery();
+            CustomerServiceImpl customerService = new CustomerServiceImpl();
+            StoreServiceImpl storeService = new StoreServiceImpl();
+            List<Order> orders = new ArrayList<>();
+            while(rs.next()){
+                Order order = new Order();
+                order.setId(rs.getInt("id"));
+                order.setAmount(rs.getBigDecimal("amount"));
+                order.setDate(rs.getDate("date"));
+                order.setStatus(rs.getString("status"));
+                order.setCostumer_id(rs.getInt("costumers_id"));
+                order.setStore_id(rs.getInt("store_id"));
+                order.setCustomer(customerService.getCustomerById(rs.getInt("costumers_id")));
+                order.setStore(storeService.getStoreById(rs.getInt("store_id")));
+                orders.add(order);
+            }return orders;
+        }finally {
+            close(rs, ps, conn);
+        }
+    }
+
+    public int orderIdFromCustomerId(int id) throws Exception {
+         PreparedStatement ps =null;
+         ResultSet rs=null;
+         Connection conn=null;
+         try {
+             conn = getConnection();
+             ps = conn.prepareStatement(Sql.GET_ORDER_ID_FROM_CUSTOMER_ID);
+             rs=ps.executeQuery();
+             if(rs.next()){
+                 return rs.getInt("order_id");
+             }
+         }finally {
+             close(rs, ps, conn);
+         }return 0;
+    }
+
+
     public static class Sql{
+        final static String GET_AMOUNT = "SELECT amount FROM orders WHERE id =?";
+        final static String UPDATE_AMOUNT = "UPDATE orders SET amount=? WHERE id=?";
+        final static String GET_ORDER_ITEM_FROM_ORDER_ID ="SELECT quantity,unit_price FROM order_item WHERE ORDER_ID = ? ORDER BY id DESC LIMIT 1";
         final static String GET_STOREID_FROM_PRODUCT_ID ="SELECT store_id FROM products WHERE id = ?";
         final static String GET_CUSTOMER_ID_FROM_CART ="SELECT id FROM orders WHERE Costumers_id =(SELECT costumer_id FROM cart)";
         final static String GET_ALL_ORDERS = "select * from orders";
@@ -176,5 +385,11 @@ public class OrderServiceImpl extends AbstractService implements OrderService {
         final static String SAVE_ORDER = "INSERT INTO orders Values(?,?,?,?,?,?)";
         final static String DELETE_ORDER = "DELETE from orders where id=?";
         final static String UPDATE_ORDER = "UPDATE orders SET amount=?,date=?,status=?,Costumers_id=?,Store_id=? WHERE id=?";
+        final static String GET_LAST_ORDER_ID = "select id from orders ORDER BY id DESC LIMIT 1";
+        final static String GET_AMOUNT_FROM_CUSTOMER_ID="SELECT amount FROM orders WHERE Costumers_id=?";
+        final static String DELETE_ORDER_FROM_CUSTOMER_ID = "DELETE FROM orders WHERE Costumers_id=?";
+        final static String GET_ORDERS_FROM_CUSTOMER_ID="SELECT * FROM orders WHERE Costumers_id=?";
+        final static String GET_ORDER_ID_FROM_CUSTOMER_ID="SELECT id FROM orders WHERE Costumers_id=?";
+        final static String GET_ORDERS_BY_STORE_ID="SELECT * FROM orders WHERE store_id=?";
     }
 }

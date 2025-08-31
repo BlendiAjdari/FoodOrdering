@@ -10,10 +10,7 @@ import org.glassfish.jersey.process.internal.Stages;
 import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 @Path("/Catalogue")
 public class CatalogueResource extends AbstractResource {
@@ -24,24 +21,27 @@ public class CatalogueResource extends AbstractResource {
     @GET
     @Produces(MediaType.APPLICATION_JSON)
     public Response getCatalogue() throws Exception {
-        List<Product>products=new ArrayList<>(productService.getAllProducts());
-        List<Store>stores=new ArrayList<>(storeService.getAllStores());
-        List<Object> result=new ArrayList<>();
-        result.addAll(products);
-        result.addAll(stores);
+        List<Map<String, Object>> result = new ArrayList<>();
+        List<Store> stores = new ArrayList<>(storeService.getAllStores());
+
+        for (Store s : stores) {
+            Map<String, Object> storeWithProducts = new HashMap<>();
+            storeWithProducts.put("store", s);
+            storeWithProducts.put("products", productService.productsByStoreId(s.getId()));
+
+            result.add(storeWithProducts);
+        }
+
         return Response.ok(gson().toJson(result)).build();
     }
     @GET
     @Path("/search")
     @Produces(MediaType.APPLICATION_JSON)
-    public Response searchCatalogue(@QueryParam("name")String name) throws Exception {
-        StoreServiceImpl storeService=new StoreServiceImpl();
-        ProductServiceImpl productService=new ProductServiceImpl();
-
-        List<Object>result=new ArrayList<>();
-        result.add(productService.getProductByName(name));
-        result.add(storeService.searchStore(name));
-        return Response.ok(result).build();
+    public Response searchCatalogue(@QueryParam("name")String name,@QueryParam("category") String category) throws Exception {
+        Set<Product> products = new HashSet<>();
+        products.addAll(productService.getProductByName(name));
+        products.addAll(productService.getProductByCategory(category));
+        return Response.ok(gson().toJson(products)).build();
     }
     @GET
     @Path("/Stores")
@@ -172,24 +172,8 @@ public class CatalogueResource extends AbstractResource {
     @Produces(MediaType.APPLICATION_JSON)
     public Response getProducts(@QueryParam("name") String name, @QueryParam("category") String category) throws Exception{
         Set<Product> products = new HashSet<>();
-        if (name != null && category != null) {
-
-            for (Product p : productService.getAllProducts()) {
-                if (p.getName().equals(name) && p.getCategory().getName().equals(category)) {
-                    products.add(p);
-                }
-                else {
-                    gson().toJson("No Products with that name and category found");
-                }
-            }
-        } else if (category != null) {
-            products.addAll(productService.getProductByCategory(category));
-        } else if (name != null) {
             products.addAll(productService.getProductByName(name));
-        } else {
-            products.addAll(productService.getAllProducts());
-        }
-
+            products.addAll(productService.getProductByCategory(category));
         return Response.ok(gson().toJson(products)).build();
     }
 

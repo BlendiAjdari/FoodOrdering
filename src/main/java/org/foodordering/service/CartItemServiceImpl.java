@@ -39,6 +39,31 @@ public class CartItemServiceImpl extends AbstractService implements CartItemServ
             close(rs,ps,conn);
         }return new BigDecimal(0);
     }
+
+    @Override
+    public List<CartItem> getCartItemsByCartId(int cartId) throws Exception {
+        PreparedStatement ps = null;
+        Connection conn = null;
+        ResultSet rs = null;
+        try {
+            conn = getConnection();
+            ps = conn.prepareStatement(Sql.GET_CART_ITEM_BY_CART_ID);
+            ps.setInt(1, cartId);
+            rs = ps.executeQuery();
+            List<CartItem> cartItems = new ArrayList<>();
+            while(rs.next()) {
+                CartItem cartItem = new CartItem();
+                cartItem.setId(rs.getInt("id"));
+                cartItem.setQuantity(rs.getInt("quantity"));
+                cartItem.setCart_id(rs.getInt("cart_id"));
+                cartItem.setProduct_id(rs.getInt("product_id"));
+                cartItems.add(cartItem);
+            }return cartItems;
+        }finally {
+            close(rs,ps,conn);
+        }
+    }
+
     @Override
     public List<CartItem> getAllCartItems() throws Exception {
         PreparedStatement ps = null;
@@ -155,5 +180,6 @@ public class CartItemServiceImpl extends AbstractService implements CartItemServ
         final static String SAVE_CART_ITEM = "INSERT INTO cart_item VALUES(?,?,?,?)";
         final static String DELETE_CART_ITEM = "DELETE FROM cart_item WHERE id=?";
         final static String UPDATE_CART_ITEM = "UPDATE cart_item SET cart_id=?,product_id=?,quantity=? WHERE id=?";
+        final static String GET_CART_ITEM_BY_CART_ID = "SELECT * FROM cart_item WHERE cart_id =?";
     }
 }

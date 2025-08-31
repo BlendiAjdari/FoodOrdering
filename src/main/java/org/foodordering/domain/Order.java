@@ -83,9 +83,6 @@ public class Order extends AbstractEntity {
 
     @Override
     public String validate() {
-        if(amount==null) {
-            return "Amount must not be zero";
-        }
         if(date == null) {
             return "Date must not be zero";
         }

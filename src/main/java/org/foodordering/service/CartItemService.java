@@ -12,4 +12,5 @@ public interface CartItemService {
     void updateCartItem(CartItem cartItem) throws Exception;
     void deleteCartItem(CartItem cartItem) throws Exception;
     BigDecimal getTotalPrice(CartItem cartItem) throws Exception;
+    List<CartItem>getCartItemsByCartId(int cartId) throws Exception;
 }

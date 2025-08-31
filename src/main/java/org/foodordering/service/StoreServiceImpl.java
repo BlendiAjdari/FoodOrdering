@@ -1,6 +1,7 @@
 package org.foodordering.service;
 
 import org.foodordering.common.AbstractService;
+import org.foodordering.domain.Product;
 import org.foodordering.domain.Store;
 
 import java.sql.*;
@@ -65,6 +66,8 @@ public class StoreServiceImpl extends AbstractService implements StoreService {
             close(rs,ps, con);
         }
     }
+
+
 
     @Override
     public void deleteStore(Store store) throws Exception {

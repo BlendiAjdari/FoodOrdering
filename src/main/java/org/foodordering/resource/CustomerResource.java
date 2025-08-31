@@ -2,13 +2,17 @@ package org.foodordering.resource;
 
 import org.foodordering.common.AbstractResource;
 import org.foodordering.domain.Customer;
+import org.foodordering.domain.Order;
 import org.foodordering.service.CustomerService;
 import org.foodordering.service.CustomerServiceImpl;
+import org.foodordering.service.OrderService;
+import org.foodordering.service.OrderServiceImpl;
 
 
 import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
+import java.util.List;
 
 
 @Path("/Customers")
@@ -58,6 +62,14 @@ public class CustomerResource extends AbstractResource {
     public Response getCostumersByID(@PathParam("id") int id) throws Exception {
         Customer c = customerService.getCustomerById(id);
         return Response.ok(gson().toJson(c)).build();
+    }
+    @GET
+    @Path("/dashboard/{id}")
+    @Produces(MediaType.APPLICATION_JSON)
+    public Response getDashboardByID(@PathParam("id") int id) throws Exception {
+        OrderService orderService = new OrderServiceImpl();
+        List<Order>orders=orderService.getOrdersByCustomerId(id);
+        return  Response.ok(gson().toJson(orders)).build();
     }
 
 }

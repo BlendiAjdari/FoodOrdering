@@ -10,4 +10,5 @@ public interface CartService {
     void addCart(Cart cart) throws Exception;
     void updateCart(Cart cart) throws Exception;
     void deleteCart(Cart cart) throws Exception;
+    int redirectToCheckout(int id)throws Exception;
 }

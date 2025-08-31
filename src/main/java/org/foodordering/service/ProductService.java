@@ -19,7 +19,5 @@ public interface ProductService {
     void stockChanges(Product product, OrderItem orderitem) throws Exception;
     Set<Product> getProductByName(String name) throws Exception;
     BigDecimal returnProductPrice(Product product) throws Exception;
-
-    Product getOnlyProductByName(String name) throws Exception;
-    Product getOnlyProductByCategory(String category) throws Exception;
+    List<Product>productsByStoreId(int storeId) throws Exception;
 }

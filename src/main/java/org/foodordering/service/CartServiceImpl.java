@@ -1,12 +1,14 @@
 package org.foodordering.service;
 
 import org.foodordering.common.AbstractService;
-import org.foodordering.domain.Cart;
-import org.foodordering.domain.Customer;
+import org.foodordering.domain.*;
 
 import java.sql.*;
+import java.time.LocalDate;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class CartServiceImpl extends AbstractService implements CartService {
     @Override
@@ -85,6 +87,68 @@ public class CartServiceImpl extends AbstractService implements CartService {
             close(ps,con);
         }
     }
+
+    @Override
+    public int redirectToCheckout(int id) throws Exception {
+        OrderService orderService = new OrderServiceImpl();
+        OrderItemService orderItemService = new OrderItemServiceImpl();
+        ProductService productService = new ProductServiceImpl();
+        AddressService addressService = new AddressServiceImpl();
+        CheckoutService checkoutService = new CheckoutServiceImpl();
+        CartItemService cartItemService = new CartItemServiceImpl();
+
+        List<CartItem> cartItems = cartItemService.getCartItemsByCartId(id);
+        if (cartItems == null || cartItems.isEmpty()) {
+            throw new Exception("Cart is empty – cannot checkout.");
+        }
+
+        int customerId = getCartById(id).getCustomer_id();
+        Address address = addressService.getAddressByCustomerId(customerId);
+        if (address == null) {
+            throw new Exception("Customer has no delivery address.");
+        }
+
+        Map<Integer, List<CartItem>> itemsByStore = new HashMap<>();
+        for (CartItem ci : cartItems) {
+            int storeId = productService.getProductById(ci.getProduct_id()).getStore_id();
+            itemsByStore.computeIfAbsent(storeId, k -> new ArrayList<>()).add(ci);
+        }
+
+        for (Map.Entry<Integer, List<CartItem>> entry : itemsByStore.entrySet()) {
+            int storeId = entry.getKey();
+            List<CartItem> items = entry.getValue();
+
+            Order order = new Order();
+            order.setCostumer_id(customerId);
+            order.setStore_id(storeId);
+            order.setDate(Date.valueOf(LocalDate.now()));
+            order.setStatus("Ordering...");
+            orderService.addOrder(order);
+
+            int orderId = orderService.lastOrderId();
+
+            for (CartItem ci : items) {
+                Product p = productService.getProductById(ci.getProduct_id());
+
+                OrderItem orderItem = new OrderItem();
+                orderItem.setOrder_id(orderId);
+                orderItem.setProduct_id(ci.getProduct_id());
+                orderItem.setQuantity(ci.getQuantity());
+                orderItem.setUnit_price(p.getPrice());
+
+                orderItemService.addOrderItem(orderItem);
+
+            }
+        }
+
+        Checkout checkout = new Checkout();
+        checkout.setCustomer_id(customerId);
+        checkout.setAddress_id(address.getId());
+        checkoutService.addCheckout(checkout);
+
+        return checkoutService.getLastCheckoutId();
+    }
+
 
     @Override
     public Cart getCartById(int id) throws Exception {

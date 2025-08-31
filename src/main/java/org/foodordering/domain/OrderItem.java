@@ -89,4 +89,8 @@ public class OrderItem extends AbstractEntity {
     public String toString() {
         return "OrderItem{ id"+ getId()+" order_id"+ getOrder_id()+" product_id"+ getProduct_id() + "unit_price"+ getUnit_price() +" quantity"+ getQuantity() +" }";
     }
+    @Override
+    public int hashCode() {
+        return Integer.hashCode(getId());
+    }
 }

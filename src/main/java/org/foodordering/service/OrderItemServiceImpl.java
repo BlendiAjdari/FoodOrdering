@@ -2,12 +2,15 @@ package org.foodordering.service;
 
 import org.foodordering.common.AbstractService;
 import org.foodordering.common.TotalAmountException;
+import org.foodordering.domain.Order;
 import org.foodordering.domain.OrderItem;
 
 import java.math.BigDecimal;
 import java.sql.*;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 public class OrderItemServiceImpl extends AbstractService implements OrderItemService {
     PreparedStatement ps = null;
@@ -21,8 +24,10 @@ public class OrderItemServiceImpl extends AbstractService implements OrderItemSe
         if(validate != null){
             throw new Exception(validate);
         }
+
         ProductService productService=new ProductServiceImpl();
     try{
+
         conn = getConnection();
         ps = conn.prepareStatement(Sql.SAVE_ORDER_ITEMS);
         ps.setInt(1, orderitem.getId());
@@ -32,6 +37,7 @@ public class OrderItemServiceImpl extends AbstractService implements OrderItemSe
         ps.setBigDecimal(5,orderitem.getUnit_price());
         productService.stockChanges(productService.getProductById(orderitem.getProduct_id()),orderitem);
         ps.executeUpdate();
+        orderService.amountChange(orderitem.getOrder_id());
     }finally {
         close(ps,conn);
     }
@@ -66,6 +72,8 @@ public class OrderItemServiceImpl extends AbstractService implements OrderItemSe
         if(validate != null){
             throw new Exception(validate);
         }
+        OrderService orderService = new OrderServiceImpl();
+        orderService.amountChange(orderItem.getOrder_id());
         try {
             conn = getConnection();
             ps = conn.prepareStatement(Sql.UPDATE_ORDERED_ITEMS);
@@ -83,12 +91,14 @@ public class OrderItemServiceImpl extends AbstractService implements OrderItemSe
     }
     @Override
     public void deleteOrderItem(OrderItem orderItem) throws Exception {
-
+        orderService.deleteAmount(orderItem.getOrder_id());
         try{
+
             conn = getConnection();
             ps = conn.prepareStatement(Sql.DELETE_ORDER_ITEMS);
             ps.setInt(1, orderItem.getId());
             ps.executeUpdate();
+
         }finally {
             close(ps,conn);
         }
@@ -156,7 +166,21 @@ public class OrderItemServiceImpl extends AbstractService implements OrderItemSe
         return null;
     }
 
+    @Override
+    public void deleteAllOrderItemsByOrderId(List<Order>orders) throws Exception {
+        try{
+            conn=getConnection();
+            ps=conn.prepareStatement(Sql.DELETE_ITEMS_BY_ORDER_ID);
+            for(Order order:orders){
+            ps.setInt(1, order.getId());
+                ps.executeUpdate();}
 
+
+
+        }finally {
+            close(ps,conn);
+        }
+    }
 
 
     public static class Sql{
@@ -166,6 +190,7 @@ public class OrderItemServiceImpl extends AbstractService implements OrderItemSe
         final static String SAVE_ORDER_ITEMS = "INSERT INTO order_item VALUES(?,?,?,?,?)";
         final static String DELETE_ORDER_ITEMS = "DELETE FROM order_item WHERE id=?";
         final static String GET_BY_ORDER_ID= "SELECT * FROM order_item WHERE order_id = ?";
+        final static String DELETE_ITEMS_BY_ORDER_ID = "DELETE FROM order_item WHERE order_id = ?";
     }
 
 

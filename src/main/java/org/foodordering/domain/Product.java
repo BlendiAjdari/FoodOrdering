@@ -126,4 +126,8 @@ public class Product extends AbstractEntity {
     public String toString() {
         return "Product ={ id= " + getId() + " name=" + name + " desciption= " + description + " store_id= " + store_id + " category_id= " + category_id + " image= " + image + " }";
     }
+    @Override
+    public int hashCode() {
+        return Integer.hashCode(getId());
+    }
 }

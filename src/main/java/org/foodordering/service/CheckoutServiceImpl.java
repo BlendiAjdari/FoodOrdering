@@ -2,14 +2,16 @@ package org.foodordering.service;
 
 import org.foodordering.common.AbstractService;
 import org.foodordering.domain.Checkout;
+import org.foodordering.domain.Order;
 import org.foodordering.domain.OrderItem;
 
-import java.math.BigDecimal;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 public class CheckoutServiceImpl extends AbstractService implements CheckoutService{
     PreparedStatement ps = null;
@@ -30,11 +32,18 @@ public class CheckoutServiceImpl extends AbstractService implements CheckoutServ
             while (rs.next()) {
                 Checkout checkout = new Checkout();
                 checkout.setId(rs.getInt("id"));
-                checkout.setOrder_id(rs.getInt("order_id"));
-                checkout.setOrder(orderService.getOrderById(rs.getInt("order_id")));
-                checkout.setOrderItems( orderItemService.getOrderItemsByOrderId(rs.getInt("order_id")));
+                checkout.setCustomer_id(rs.getInt("customer_id"));
                 checkout.setAddress_id(rs.getInt("address_id"));
-                checkout.setAddress(addressService.getAddressByCustomerId(orderService.getOrderById(rs.getInt("order_id")).getCostumer_id()));
+                checkout.setAddress(addressService.getAddressByCustomerId(rs.getInt("customer_id")));
+                checkout.setTotalAmount(rs.getBigDecimal("total_amount"));
+                List<Order>orders=orderService.getOrdersByCustomerId(rs.getInt("customer_id"));
+                checkout.setOrders(orders);
+                List<OrderItem>orderItems=orderItemService.getOrderItemsByOrderId(orders.getFirst().getId());
+
+                    checkout.setOrderItems(orderItems);
+
+
+
                 checkouts.add(checkout);
 
             }return checkouts;
@@ -50,20 +59,28 @@ public class CheckoutServiceImpl extends AbstractService implements CheckoutServ
             ps = conn.prepareStatement(Sql.GET_CHECKOUT_BY_ID);
             ps.setInt(1, id);
             rs = ps.executeQuery();
-            if (rs.next()) {
+
+            if(rs.next()) {
                 Checkout checkout = new Checkout();
                 checkout.setId(rs.getInt("id"));
-                checkout.setOrder_id(rs.getInt("order_id"));
-                checkout.setOrder(orderService.getOrderById(rs.getInt("order_id")));
-                checkout.setOrderItems( orderItemService.getOrderItemsByOrderId(rs.getInt("order_id")));
+                checkout.setCustomer_id(rs.getInt("customer_id"));
                 checkout.setAddress_id(rs.getInt("address_id"));
-                checkout.setAddress(addressService.getAddressById(rs.getInt("address_id")));
+                checkout.setAddress(addressService.getAddressByCustomerId(rs.getInt("customer_id")));
+                checkout.setTotalAmount(rs.getBigDecimal("total_amount"));
+                List<Order>orders=orderService.getOrdersByCustomerId(rs.getInt("customer_id"));
+                checkout.setOrders(orders);
+
+                List<OrderItem>orderItems=orderItemService.getOrderItemsByOrderId(orders.getFirst().getId());
+
+                checkout.setOrderItems(orderItems);
+
                 return checkout;
-            }
+
+            }return null;
         }finally {
             close(rs,ps,conn);
         }
-        return null;
+
     }
 
     @Override
@@ -72,12 +89,14 @@ public class CheckoutServiceImpl extends AbstractService implements CheckoutServ
         if(validate != null){
             throw new Exception(validate);
         }
+
         try {
             conn = getConnection();
             ps = conn.prepareStatement(Sql.SAVE_CHECKOUT);
             ps.setInt(1, checkout.getId());
-            ps.setInt(2, checkout.getOrder_id());
-            ps.setInt(3, addressService.getAddressByCustomerId(orderService.getOrderById(checkout.getOrder_id()).getCostumer_id()).getId());
+            ps.setInt(2, checkout.getCustomer_id());
+            ps.setInt(3, checkout.getAddress_id());
+            ps.setBigDecimal(4, orderService.orderAmountByCustomerId(checkout.getCustomer_id()));
             ps.executeUpdate();
         }finally {
             close(ps,conn);
@@ -94,9 +113,10 @@ public class CheckoutServiceImpl extends AbstractService implements CheckoutServ
      try {
          conn = getConnection();
          ps = conn.prepareStatement(Sql.UPDATE_CHECKOUT);
-         ps.setInt(1,checkout.getOrder_id());
-         ps.setInt(2,addressService.getAddressById(orderService.getOrderById(checkout.getOrder_id()).getCostumer_id()).getId());
-         ps.setInt(3,checkout.getId());
+         ps.setInt(1,checkout.getCustomer_id());
+         ps.setInt(2,addressService.getAddressById(checkout.getCustomer_id()).getId());
+         ps.setBigDecimal(3, orderService.orderAmountByCustomerId(checkout.getCustomer_id()));
+         ps.setInt(4,checkout.getId());
          ps.executeUpdate();
      }finally {
          close(ps,conn);
@@ -115,27 +135,56 @@ public class CheckoutServiceImpl extends AbstractService implements CheckoutServ
        }
     }
 
-    public BigDecimal orderItemsTotalCost(OrderItem orderItem) throws Exception {
-        try {
+    @Override
+    public int getLastCheckoutId() throws Exception {
+        try{
             conn = getConnection();
-            ps = conn.prepareStatement(Sql.ORDER_TOTAL_COST);
-            rs=ps.executeQuery();
-            if(rs.next()){
-                int n = rs.getInt("order_id");
-                orderItemService.getOrderItemsByOrderId(n);
-
+            ps = conn.prepareStatement(Sql.GET_LAST_CHECKOUT_ID);
+            rs = ps.executeQuery();
+            if(rs.next()) {
+                return rs.getInt("id");
             }
         }finally {
             close(rs,ps,conn);
-        }return null;
+        }return 0;
     }
+
+    @Override
+    public void deleteCheckoutByCustomerId(int customerId) throws Exception {
+
+        try {
+            conn = getConnection();
+            ps = conn.prepareStatement(Sql.DELETE_CHECKOUT_BY_CUSTOMER_ID);
+            ps.setInt(1, customerId);
+            ps.executeUpdate();
+        }finally {
+            close(ps,conn);
+        }
+    }
+
+    @Override
+    public int getCheckoutIdByCustomerId(int customerId) throws Exception {
+        try {
+            conn = getConnection();
+            ps = conn.prepareStatement(Sql.GET_ID_FROM_CUSTOMER_ID);
+            ps.setInt(1, customerId);
+            rs = ps.executeQuery();
+            if(rs.next()) {
+                return rs.getInt("id");
+            }
+        }finally {
+            close(rs,ps,conn);
+        }return 0;
+    }
+
     public static class Sql{
-        final static String ORDER_TOTAL_COST="SELECT order_id from checkout";
         final static String GET_ALL_CHECKOUTS = "select * from checkout";
         final static String GET_CHECKOUT_BY_ID = "select * from checkout where id = ?";
-        final static String SAVE_CHECKOUT = "INSERT INTO checkout VALUES(?,?,?)";
+        final static String SAVE_CHECKOUT = "INSERT INTO checkout VALUES(?,?,?,?)";
         final static String DELETE_CHECKOUT = "delete from checkout where id = ?";
-        final static String UPDATE_CHECKOUT = "UPDATE checkout SET order_id=?,address_id=? where id=?";
-
+        final static String UPDATE_CHECKOUT = "UPDATE checkout SET customer_id=?,address_id=?,total_amount=? where id=?";
+        final static String GET_LAST_CHECKOUT_ID="SELECT id FROM checkout ORDER BY id DESC LIMIT 1";
+        final static String DELETE_CHECKOUT_BY_CUSTOMER_ID="DELETE FROM checkout WHERE customer_id = ?";
+        final static String GET_ID_FROM_CUSTOMER_ID = "select id from checkout where customer_id = ?";
     }
 }

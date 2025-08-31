@@ -173,12 +173,16 @@ public class ProductServiceImpl extends AbstractService  implements ProductServi
     }
 
     @Override
-    public Product getOnlyProductByName(String name) throws Exception {
-        final String query = "SELECT * FROM Products WHERE name LIKE '"+name+"%' ";
+    public List<Product> productsByStoreId(int storeId) throws Exception {
+        PreparedStatement ps =null;
+        ResultSet rs = null;
+        Connection conn = null;
         try {
             conn = getConnection();
-            ps = conn.prepareStatement(query);
-            ResultSet rs = ps.executeQuery();
+            ps = conn.prepareStatement(Sql.GET_PRODUCTS_BY_STORE_ID);
+            ps.setInt(1, storeId);
+            rs =ps.executeQuery();
+            List<Product> products = new ArrayList<>();
             while (rs.next()) {
                 Product product = new Product();
                 product.setId(rs.getInt("id"));
@@ -187,51 +191,16 @@ public class ProductServiceImpl extends AbstractService  implements ProductServi
                 product.setPrice(rs.getBigDecimal("price"));
                 product.setStock_quantity(rs.getInt("stock_quantity"));
                 product.setStore_id(rs.getInt("store_id"));
-                product.setStore(storeService.getStoreById(rs.getInt("store_id")));
-                product.setCategory_id(rs.getInt("category_id"));
-                product.setCategory(categoriesService.getCategoryById(rs.getInt("category_id")));
-                product.setImage(rs.getString("image"));
-                return product;
-            }
+                products.add(product);
+            }return products;
         }finally {
             close(rs,ps,conn);
         }
-        return null;
-    }
-
-    @Override
-    public Product getOnlyProductByCategory(String category) throws Exception {
-        final String query = "SELECT * FROM products WHERE category_id = (SELECT id FROM category WHERE name LIKE '" + category + "%') ";
-
-        try {
-            conn = getConnection();
-            ps = conn.prepareStatement(query);
-            ResultSet rs = ps.executeQuery();
-
-            while (rs.next()) {
-                Product product = new Product();
-                product.setId(rs.getInt("id"));
-                product.setName(rs.getString("name"));
-                product.setDescription(rs.getString("description"));
-                product.setPrice(rs.getBigDecimal("price"));
-                product.setStock_quantity(rs.getInt("stock_quantity"));
-                product.setStore_id(rs.getInt("store_id"));
-                product.setStore(storeService.getStoreById(rs.getInt("store_id")));
-                product.setCategory_id(rs.getInt("category_id"));
-                product.setCategory(categoriesService.getCategoryById(rs.getInt("category_id")));
-                product.setImage(rs.getString("image"));
-                return product;
-            }
-
-        } finally {
-            close(rs, ps, conn);
-        }
-        return null;
     }
 
     @Override
     public Set<Product>getProductByCategory(String category) throws Exception {
-        final String query = "SELECT * FROM products WHERE category_id = (SELECT id FROM category WHERE name LIKE '" + category + "%') ";
+        final String query = "SELECT * FROM products WHERE category_id IN (SELECT id FROM category WHERE name LIKE '" + category + "%') ";
 
         try {
             conn = getConnection();
@@ -284,5 +253,6 @@ public class ProductServiceImpl extends AbstractService  implements ProductServi
         final static String UPDATE_PRODUCT = "UPDATE Products SET store_id=?,category_id=?,name = ?, description = ?, price = ?,stock_quantity=?, image = ? WHERE id = ?";
         final static String DELETE_PRODUCT = "DELETE FROM Products WHERE id = ?";
         final static String UPDATE_STOCK =  "UPDATE Products SET stock_quantity=? WHERE id = ?";
+        final static String GET_PRODUCTS_BY_STORE_ID="SELECT * FROM Products WHERE store_id=?";
     }
 }

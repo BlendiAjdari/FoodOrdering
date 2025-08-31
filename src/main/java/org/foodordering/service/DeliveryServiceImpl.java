@@ -25,14 +25,14 @@ public class DeliveryServiceImpl extends AbstractService implements DeliveryServ
             List<Delivery> deliveries = new ArrayList<>();
             while(rs.next()){
                Delivery delivery = new Delivery();
-               delivery.setId(rs.getInt(1));
-               delivery.setOrder_id(rs.getInt(2));
-               delivery.setOrder(orderService.getOrderById(rs.getInt(2)));
-               delivery.setCourier_id(rs.getInt(3));
-               delivery.setCourier(courierService.getCourierById(rs.getInt(3)));
-               delivery.setStatus(rs.getString(4));
-               delivery.setPickup_time(rs.getTime(5));
-               delivery.setDelivery_time(rs.getTime(6));
+               delivery.setId(rs.getInt("id"));
+               delivery.setCustomer_id(rs.getInt("customer_id"));
+               delivery.setOrders(orderService.getOrdersByCustomerId(rs.getInt("customer_id")));
+               delivery.setCourier_id(rs.getInt("courier_id"));
+               delivery.setCourier(courierService.getCourierById(rs.getInt("courier_id")));
+               delivery.setStatus(rs.getString("status"));
+               delivery.setPickup_time(rs.getTime("pickup_time"));
+               delivery.setDelivery_time(rs.getTime("delivery_time"));
                deliveries.add(delivery);
             }return deliveries;
             }finally {
@@ -49,14 +49,14 @@ public class DeliveryServiceImpl extends AbstractService implements DeliveryServ
             rs = ps.executeQuery();
             if(rs.next()){
               Delivery delivery = new Delivery();
-              delivery.setId(rs.getInt(1));
-              delivery.setOrder_id(rs.getInt(2));
-              delivery.setOrder(orderService.getOrderById(rs.getInt(3)));
-              delivery.setCourier_id(rs.getInt(3));
-              delivery.setCourier(courierService.getCourierById(rs.getInt(4)));
-              delivery.setStatus(rs.getString(4));
-              delivery.setPickup_time(rs.getTime(5));
-              delivery.setDelivery_time(rs.getTime(6));
+              delivery.setId(rs.getInt("id"));
+              delivery.setCustomer_id(rs.getInt("customer_id"));
+              delivery.setOrders(orderService.getOrdersByCustomerId(rs.getInt("customer_id")));
+              delivery.setCourier_id(rs.getInt("courier_id"));
+              delivery.setCourier(courierService.getCourierById(rs.getInt("courier_id")));
+              delivery.setStatus(rs.getString("status"));
+              delivery.setPickup_time(rs.getTime("pickup_time"));
+              delivery.setDelivery_time(rs.getTime("delivery_time"));
               return delivery;
             }return null;
         }finally {
@@ -74,7 +74,7 @@ public class DeliveryServiceImpl extends AbstractService implements DeliveryServ
             conn = getConnection();
             ps = conn.prepareStatement(Sql.SAVE_DELIVERY);
             ps.setInt(1, delivery.getId());
-            ps.setInt(2, delivery.getOrder_id());
+            ps.setInt(2, delivery.getCustomer_id());
             ps.setInt(3, delivery.getCourier_id());
             ps.setString(4, delivery.getStatus());
             ps.setTime(5, delivery.getPickup_time());
@@ -95,7 +95,7 @@ public class DeliveryServiceImpl extends AbstractService implements DeliveryServ
             conn = getConnection();
             ps = conn.prepareStatement(Sql.UPDATE_DELIVERY);
         ps.setInt(1, delivery.getId());
-        ps.setInt(2, delivery.getOrder_id());
+        ps.setInt(2, delivery.getCustomer_id());
         ps.setInt(3, delivery.getCourier_id());
         ps.setString(4, delivery.getStatus());
         ps.setTime(5, delivery.getPickup_time());
@@ -124,6 +124,6 @@ public class DeliveryServiceImpl extends AbstractService implements DeliveryServ
         final static String GET_DELIVERY_BY_ID = "SELECT * FROM delivery WHERE id = ?";
         final static String SAVE_DELIVERY="INSERT INTO delivery VALUES(?,?,?,?,?,?)";
         final static String DELETE_DELIVERY = "DELETE FROM delivery WHERE id = ?";
-        final static String UPDATE_DELIVERY = "UPDATE delivery SET order_id = ?,courier_id=?,status=?,pickup_time=?,delivery_time=? WHERE id = ?";
+        final static String UPDATE_DELIVERY = "UPDATE delivery SET customer_id = ?,courier_id=?,status=?,pickup_time=?,delivery_time=? WHERE id = ?";
     }
 }

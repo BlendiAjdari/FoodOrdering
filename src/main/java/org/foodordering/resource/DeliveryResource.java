@@ -28,8 +28,8 @@ public class DeliveryResource extends AbstractResource {
     public Response addDelivery(String payload) throws Exception {
         Delivery delivery = gson().fromJson(payload, Delivery.class);
         delivery.setId(delivery.getId());
-        delivery.setOrder_id(delivery.getOrder_id());
-        delivery.setOrder(orderService.getOrderById(delivery.getOrder_id()));
+        delivery.setCustomer_id(delivery.getCustomer_id());
+        delivery.setOrders(orderService.getOrdersByCustomerId(delivery.getCustomer_id()));
         delivery.setCourier_id(delivery.getCourier_id());
         delivery.setCourier(courierService.getCourierById(delivery.getCourier_id()));
         delivery.setStatus(delivery.getStatus());
@@ -46,8 +46,8 @@ public class DeliveryResource extends AbstractResource {
     public Response updateDelivery(@PathParam("id") int id, String payload) throws Exception {
         Delivery delivery = gson().fromJson(payload, Delivery.class);
         delivery.setId(delivery.getId());
-        delivery.setOrder_id(delivery.getOrder_id());
-        delivery.setOrder(orderService.getOrderById(delivery.getOrder_id()));
+        delivery.setCustomer_id(delivery.getCustomer_id());
+        delivery.setOrders(orderService.getOrdersByCustomerId(delivery.getCustomer_id()));
         delivery.setCourier_id(delivery.getCourier_id());
         delivery.setCourier(courierService.getCourierById(delivery.getCourier_id()));
         delivery.setStatus(delivery.getStatus());

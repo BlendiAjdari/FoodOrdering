@@ -2,9 +2,7 @@ package org.foodordering.resource;
 
 import org.foodordering.common.AbstractResource;
 import org.foodordering.domain.OrderItem;
-import org.foodordering.service.OrderItemService;
-import org.foodordering.service.OrderItemServiceImpl;
-import org.foodordering.service.ProductServiceImpl;
+import org.foodordering.service.*;
 
 import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
@@ -19,7 +17,7 @@ public class OrderItemResource extends AbstractResource {
     @Produces(MediaType.APPLICATION_JSON)
     public Response getAllOrderItems() throws Exception {
         List<OrderItem> orderItems = new ArrayList<OrderItem>(orderItemService.getAllOrderItems());
-        return Response.ok(orderItems).build();
+        return Response.ok(gson().toJson(orderItems)).build();
     }
     @POST
     @Path("/insert")
@@ -27,14 +25,17 @@ public class OrderItemResource extends AbstractResource {
     @Produces(MediaType.APPLICATION_JSON)
     public Response insertOrderItems(String payload) throws Exception {
         ProductServiceImpl productService = new ProductServiceImpl();
+        OrderService orderService = new OrderServiceImpl();
         OrderItem orderItem = gson().fromJson(payload, OrderItem.class);
         orderItem.setId(orderItem.getId());
         orderItem.setOrder_id(orderItem.getOrder_id());
         orderItem.setProduct_id(orderItem.getProduct_id());
+        orderItem.setProduct(productService.getProductById(orderItem.getProduct_id()));
         orderItem.setQuantity(orderItem.getQuantity());
         orderItem.setUnit_price(orderItem.getUnit_price());
         orderItemService.addOrderItem(orderItem);
-        return Response.ok(orderItem).build();
+        orderItem.setOrder(orderService.getOrderById(orderItem.getOrder_id()));
+        return Response.ok(gson().toJson(orderItem)).build();
 
     }
     @DELETE
