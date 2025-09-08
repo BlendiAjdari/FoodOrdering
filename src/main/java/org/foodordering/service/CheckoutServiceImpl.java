@@ -185,23 +185,6 @@ public class CheckoutServiceImpl extends AbstractService implements CheckoutServ
         }
     }
 
-    @Override
-    public int getCheckoutIdByCustomerId(int customerId) throws Exception {
-        PreparedStatement ps = null;
-        Connection conn = null;
-        ResultSet rs = null;
-        try {
-            conn = getConnection();
-            ps = conn.prepareStatement(Sql.GET_ID_FROM_CUSTOMER_ID);
-            ps.setInt(1, customerId);
-            rs = ps.executeQuery();
-            if(rs.next()) {
-                return rs.getInt("id");
-            }
-        }finally {
-            close(rs,ps,conn);
-        }return 0;
-    }
 
     public static class Sql{
         final static String GET_ALL_CHECKOUTS = "select * from checkout";
@@ -211,6 +194,5 @@ public class CheckoutServiceImpl extends AbstractService implements CheckoutServ
         final static String UPDATE_CHECKOUT = "UPDATE checkout SET customer_id=?,address_id=?,total_amount=? where id=?";
         final static String GET_LAST_CHECKOUT_ID="SELECT id FROM checkout ORDER BY id DESC LIMIT 1";
         final static String DELETE_CHECKOUT_BY_CUSTOMER_ID="DELETE FROM checkout WHERE customer_id = ?";
-        final static String GET_ID_FROM_CUSTOMER_ID = "select id from checkout where customer_id = ?";
     }
 }

@@ -257,8 +257,6 @@ public class OrderServiceImpl extends AbstractService implements OrderService {
         try {
             conn = getConnection();
             orderItemService.deleteAllOrderItemsByOrderId(getOrdersByCustomerId(id));
-            PaymentService paymentService = new PaymentServiceImpl();
-            paymentService.deletePaymentByCustomerId(id);
             checkoutService.deleteCheckoutByCustomerId(id);
             ps = conn.prepareStatement(Sql.DELETE_ORDER_FROM_CUSTOMER_ID);
             ps.setInt(1, id);

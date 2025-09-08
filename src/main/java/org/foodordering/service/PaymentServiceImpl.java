@@ -90,22 +90,6 @@ public class PaymentServiceImpl extends AbstractService implements PaymentServic
     }
 
     @Override
-    public void deletePaymentByCustomerId(int checkoutId) throws Exception {
-        PreparedStatement ps = null;
-        Connection conn = null;
-        try {
-            conn=getConnection();
-            ps=conn.prepareStatement(Sql.DELETE_PAYMENT_BY_CUSTOMER_ID);
-            ps.setInt(1, checkoutId);
-            ps.executeUpdate();
-
-        }finally {
-            close(ps,conn);
-        }
-    }
-
-
-    @Override
     public Payment getPaymentById(int id) throws Exception {
         PreparedStatement ps = null;
         Connection conn = null;
@@ -166,7 +150,6 @@ public class PaymentServiceImpl extends AbstractService implements PaymentServic
         final static String SAVE_PAYMENT = "INSERT INTO payments VALUES (?,?,?,?,?,?,?,?)";
         final static String DELETE_PAYMENT = "DELETE FROM payments WHERE id=?";
         final static String UPDATE_PAYMENT = "UPDATE payments SET customer_id=?,card_id=?,e_wallet_id=?,amount=?,method=?,status=?,date=? WHERE id=?";
-        final static String DELETE_PAYMENT_BY_CUSTOMER_ID = "DELETE FROM payments WHERE customer_id=?";
     }
 
 }

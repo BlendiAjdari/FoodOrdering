@@ -11,5 +11,4 @@ public interface PaymentService {
     void addPayment(Payment payment) throws Exception;
     void updatePayment(Payment payment) throws Exception;
     void deletePayment(Payment payment) throws Exception;
-    void deletePaymentByCustomerId(int checkoutId) throws Exception;
 }

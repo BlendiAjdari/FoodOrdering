@@ -129,33 +129,9 @@ public class CardServiceImpl extends AbstractService implements CardService {
     }
 
 
-    @Override
-    public boolean cardCheck(Card card) throws Exception{
-        PreparedStatement ps = null;
-        Connection conn = null;
-        ResultSet rs = null;
-        try {
-            conn = getConnection();
-            ps =conn.prepareStatement(Sql.COMPARE_CARD_DETAILS);
-            ps.setInt(1,card.getId());
-            rs=ps.executeQuery();
-            if(rs.next()){
-                if(Encryption.encrypt(card.getCardNumber()).equals(rs.getString("card_number"))&&
-                      Encryption.encrypt( card.getCardVerificationValue()).equals(rs.getString("cvv"))){
-                    return true;
-                }else {
-                    return false;
-                }
 
-            }
-
-        }finally {
-            close(rs,ps,conn);
-        }return false;
-    }
 
     public static class Sql{
-        final static String COMPARE_CARD_DETAILS = "SELECT card_number,cvv FROM card WHERE id=?";
         final static String GET_CARDS="select * from card";
         final static String GET_CARD_BY_ID="select * from card where id=?";
         final static String SAVE_CARD="insert into card values(?,?,?,?,?,?)";

@@ -10,5 +10,4 @@ public interface CardService {
     void addCard(Card card) throws Exception;
     void updateCard(Card card) throws Exception;
     void deleteCard(Card card) throws Exception;
-    boolean cardCheck(Card card) throws Exception;
 }

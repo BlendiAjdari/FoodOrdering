@@ -21,7 +21,7 @@ public class Card extends AbstractEntity {
     @SerializedName("c_id")
     private int customer_id;
 
-    DateTimeFormatter formatter = DateTimeFormatter.ofPattern("MM/yy");
+
 
 
     public String getExpiryDate() {
@@ -69,11 +69,20 @@ public class Card extends AbstractEntity {
         if(cardName == null || cardName.isEmpty()){
             return "Card name is required";
         }
-        if(expiryDate == null){
+        if(expiryDate == null || expiryDate.isEmpty()){
             return "Expiry Date is required";
         }
-        if(LocalDate.now().isAfter(YearMonth.parse(expiryDate, formatter).atEndOfMonth())){
-            return "Expiry Date is after date";
+        YearMonth exp;
+        try {
+            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("MM/yy");
+            exp = YearMonth.parse(expiryDate.trim(), formatter);
+        } catch (Exception e) {
+            return "Expiry Date format must be MM/yy";
+        }
+        LocalDate expiryLocalDate = exp.atEndOfMonth();
+
+        if (LocalDate.now().isAfter(expiryLocalDate)) {
+            return "Card is expired";
         }
         if(cardNumber.length()<14){
             return "Card number in too short";
@@ -82,8 +91,13 @@ public class Card extends AbstractEntity {
             return "Card number is too long";
         }
         for (char c : cardNumber.toCharArray()){
-            if(!Character.isDigit(c) && !Character.isDigit(' ')){
+            if (!Character.isDigit(c) && c != ' ') {
                 return "Card number can't have letters";
+            }
+        }
+        for(char c : cardVerificationValue.toCharArray()){
+            if (!Character.isDigit(c) && c != ' ') {
+                return "Card verification values can't have letters in it";
             }
         }
         if(cardVerificationValue.length()!=3){

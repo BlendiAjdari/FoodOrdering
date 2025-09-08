@@ -12,6 +12,6 @@ public interface CheckoutService {
     void deleteCheckout(Checkout checkout) throws Exception;
     int getLastCheckoutId() throws Exception;
     void deleteCheckoutByCustomerId(int customerId) throws Exception;
-    int getCheckoutIdByCustomerId(int customerId) throws Exception;
+
 }
 
