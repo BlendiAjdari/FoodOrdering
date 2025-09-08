@@ -13,19 +13,18 @@ import java.util.List;
 import java.util.Set;
 
 public class ProductServiceImpl extends AbstractService  implements ProductService {
-    PreparedStatement ps = null;
-    ResultSet rs = null;
-    Connection conn = null;
     StoreServiceImpl storeService = new StoreServiceImpl();
     CategoriesServiceImpl categoriesService = new CategoriesServiceImpl();
     @Override
     public List<Product> getAllProducts() throws Exception {
-
+        PreparedStatement ps = null;
+        Connection conn = null;
+        ResultSet rs = null;
         try {
             conn=getConnection();
             ps=conn.prepareStatement(Sql.GET_ALL_PRODUCTS);
             List<Product> products = new ArrayList<Product>();
-            ResultSet rs = ps.executeQuery();
+            rs = ps.executeQuery();
 
 
             while (rs.next()) {
@@ -49,6 +48,9 @@ public class ProductServiceImpl extends AbstractService  implements ProductServi
     }
     @Override
     public Product getProductById(int id) throws Exception {
+        PreparedStatement ps = null;
+        Connection conn = null;
+        ResultSet rs = null;
         try {
             conn = getConnection();
             ps =conn.prepareStatement(Sql.GET_PRODUCT_BY_ID);
@@ -75,6 +77,9 @@ public class ProductServiceImpl extends AbstractService  implements ProductServi
     }
     @Override
     public void addProduct(Product product) throws Exception {
+        PreparedStatement ps = null;
+        Connection conn = null;
+        ResultSet rs = null;
         String validate = product.validate();
         if(validate != null){
             throw new Exception(validate);
@@ -97,6 +102,8 @@ public class ProductServiceImpl extends AbstractService  implements ProductServi
     }
     @Override
     public void updateProduct(Product product) throws Exception {
+        PreparedStatement ps = null;
+        Connection conn = null;
         String validate = product.validate();
         if(validate != null){
             throw new Exception(validate);
@@ -120,6 +127,8 @@ public class ProductServiceImpl extends AbstractService  implements ProductServi
 
     @Override
     public void deleteProduct(Product product) throws Exception {
+        PreparedStatement ps = null;
+        Connection conn = null;
         try{
             conn = getConnection();
             ps = conn.prepareStatement(Sql.DELETE_PRODUCT);
@@ -133,10 +142,13 @@ public class ProductServiceImpl extends AbstractService  implements ProductServi
     @Override
     public Set<Product> getProductByName(String name) throws Exception {
         final String query = "SELECT * FROM Products WHERE name LIKE '"+name+"%' ";
+        PreparedStatement ps = null;
+        Connection conn = null;
+        ResultSet rs = null;
         try {
             conn = getConnection();
             ps = conn.prepareStatement(query);
-            ResultSet rs = ps.executeQuery();
+            rs = ps.executeQuery();
             Set<Product> products = new HashSet<>();
             while (rs.next()) {
                 Product product = new Product();
@@ -159,11 +171,14 @@ public class ProductServiceImpl extends AbstractService  implements ProductServi
 
     @Override
     public BigDecimal returnProductPrice(Product product) throws Exception {
+        PreparedStatement ps = null;
+        Connection conn = null;
+        ResultSet rs = null;
         try{
             conn = getConnection();
             ps = conn.prepareStatement(Sql.GET_PRICE);
             ps.setInt(1, product.getId());
-            ResultSet rs = ps.executeQuery();
+            rs = ps.executeQuery();
             if(rs.next()){
                 return rs.getBigDecimal("price");
             }
@@ -190,6 +205,8 @@ public class ProductServiceImpl extends AbstractService  implements ProductServi
                 product.setDescription(rs.getString("description"));
                 product.setPrice(rs.getBigDecimal("price"));
                 product.setStock_quantity(rs.getInt("stock_quantity"));
+                product.setCategory_id(rs.getInt("category_id"));
+                product.setCategory(categoriesService.getCategoryById(rs.getInt("category_id")));
                 product.setStore_id(rs.getInt("store_id"));
                 products.add(product);
             }return products;
@@ -201,11 +218,13 @@ public class ProductServiceImpl extends AbstractService  implements ProductServi
     @Override
     public Set<Product>getProductByCategory(String category) throws Exception {
         final String query = "SELECT * FROM products WHERE category_id IN (SELECT id FROM category WHERE name LIKE '" + category + "%') ";
-
+        PreparedStatement ps = null;
+        Connection conn = null;
+        ResultSet rs = null;
         try {
             conn = getConnection();
             ps = conn.prepareStatement(query);
-            ResultSet rs = ps.executeQuery();
+            rs = ps.executeQuery();
             Set<Product> products = new HashSet<>();
             while (rs.next()) {
                Product product = new Product();
@@ -228,6 +247,8 @@ public class ProductServiceImpl extends AbstractService  implements ProductServi
     }
     @Override
     public void stockChanges(Product product, OrderItem orderitem) throws Exception {
+        PreparedStatement ps = null;
+        Connection conn = null;
         try {
             conn = getConnection();
             ps = conn.prepareStatement(Sql.UPDATE_STOCK);

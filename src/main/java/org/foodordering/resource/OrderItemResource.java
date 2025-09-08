@@ -32,7 +32,7 @@ public class OrderItemResource extends AbstractResource {
         orderItem.setProduct_id(orderItem.getProduct_id());
         orderItem.setProduct(productService.getProductById(orderItem.getProduct_id()));
         orderItem.setQuantity(orderItem.getQuantity());
-        orderItem.setUnit_price(orderItem.getUnit_price());
+        orderItem.setUnit_price(productService.getProductById(orderItem.getProduct_id()).getPrice());
         orderItemService.addOrderItem(orderItem);
         orderItem.setOrder(orderService.getOrderById(orderItem.getOrder_id()));
         return Response.ok(gson().toJson(orderItem)).build();
@@ -51,14 +51,22 @@ public class OrderItemResource extends AbstractResource {
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
     public Response updateOrderItems(@PathParam("id") int id, String payload) throws Exception {
+        ProductService  productService = new ProductServiceImpl();
         OrderItem orderItem = gson().fromJson(payload, OrderItem.class);
-        orderItem.setId(orderItem.getId());
+        orderItem.setId(id);
         orderItem.setOrder_id(orderItem.getOrder_id());
         orderItem.setProduct_id(orderItem.getProduct_id());
         orderItem.setQuantity(orderItem.getQuantity());
-        orderItem.setUnit_price(orderItem.getUnit_price());
+        orderItem.setUnit_price(productService.getProductById(orderItem.getProduct_id()).getPrice());
         orderItemService.updateOrderItem(orderItem);
-        return Response.ok(orderItem).build();
+        return Response.ok(gson().toJson(orderItem)).build();
+    }
+    @GET
+    @Path("/{id}")
+    @Produces(MediaType.APPLICATION_JSON)
+    public Response getOrderItemById(@PathParam("id") int id) throws Exception {
+        OrderItem orderItem = orderItemService.getOrderItemById(id);
+        return Response.ok(gson().toJson(orderItem)).build();
     }
 
 }

@@ -45,4 +45,9 @@ public class Ewallet extends AbstractEntity {
 
         return null;
     }
+
+    @Override
+    public String toString() {
+        return "E-wallet " +"id "+getId()+" username "+getUsername()+" password "+getPassword()+" card_id "+getCard_id();
+    }
 }

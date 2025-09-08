@@ -3,6 +3,7 @@ package org.foodordering.service;
 import org.foodordering.common.AbstractService;
 import org.foodordering.domain.Courier;
 import org.foodordering.domain.Delivery;
+import org.foodordering.domain.Order;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -11,13 +12,14 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class DeliveryServiceImpl extends AbstractService implements DeliveryService{
-    private PreparedStatement ps = null;
-    private Connection conn = null;
-    private  ResultSet rs = null;
+
     CourierService courierService = new CourierServiceImpl();
     OrderService orderService = new OrderServiceImpl();
     @Override
     public List<Delivery> getAllDelivery() throws Exception {
+        PreparedStatement ps = null;
+        Connection conn = null;
+        ResultSet rs = null;
         try{
             conn =  getConnection();
             ps = conn.prepareStatement(Sql.GET_ALL_DELIVERIES);
@@ -42,6 +44,9 @@ public class DeliveryServiceImpl extends AbstractService implements DeliveryServ
 
     @Override
     public Delivery getDeliveryById(int id) throws Exception {
+        PreparedStatement ps = null;
+        Connection conn = null;
+        ResultSet rs = null;
         try{
             conn =  getConnection();
             ps = conn.prepareStatement(Sql.GET_DELIVERY_BY_ID);
@@ -66,15 +71,23 @@ public class DeliveryServiceImpl extends AbstractService implements DeliveryServ
 
     @Override
     public void addDelivery(Delivery delivery) throws Exception {
+
         String validate = delivery.validate();
         if(validate != null){
             throw new Exception(validate);
         }
+        PreparedStatement ps = null;
+        Connection conn = null;
+        ResultSet rs = null;
+        OrderService orderService = new OrderServiceImpl();
      try{
             conn = getConnection();
             ps = conn.prepareStatement(Sql.SAVE_DELIVERY);
             ps.setInt(1, delivery.getId());
             ps.setInt(2, delivery.getCustomer_id());
+            if(orderService.getOrdersByCustomerId(delivery.getCustomer_id()).isEmpty()){
+                throw new Exception("Can't delivery empty order!");
+            }
             ps.setInt(3, delivery.getCourier_id());
             ps.setString(4, delivery.getStatus());
             ps.setTime(5, delivery.getPickup_time());
@@ -91,15 +104,21 @@ public class DeliveryServiceImpl extends AbstractService implements DeliveryServ
         if(validate != null){
             throw new Exception(validate);
         }
+        PreparedStatement ps = null;
+        Connection conn = null;
+        OrderService orderService = new OrderServiceImpl();
     try{
             conn = getConnection();
             ps = conn.prepareStatement(Sql.UPDATE_DELIVERY);
-        ps.setInt(1, delivery.getId());
-        ps.setInt(2, delivery.getCustomer_id());
-        ps.setInt(3, delivery.getCourier_id());
-        ps.setString(4, delivery.getStatus());
-        ps.setTime(5, delivery.getPickup_time());
-        ps.setTime(6, delivery.getDelivery_time());
+        ps.setInt(6, delivery.getId());
+        ps.setInt(1, delivery.getCustomer_id());
+        if(orderService.getOrdersByCustomerId(delivery.getCustomer_id()).isEmpty()){
+            throw new Exception("Can't delivery empty order!");
+        }
+        ps.setInt(2, delivery.getCourier_id());
+        ps.setString(3, delivery.getStatus());
+        ps.setTime(4, delivery.getPickup_time());
+        ps.setTime(5, delivery.getDelivery_time());
 
             ps.executeUpdate();
     }finally {
@@ -109,6 +128,8 @@ public class DeliveryServiceImpl extends AbstractService implements DeliveryServ
 
     @Override
     public void deleteDelivery(Delivery delivery) throws Exception {
+        PreparedStatement ps = null;
+        Connection conn = null;
         try{
             conn = getConnection();
             ps = conn.prepareStatement(Sql.DELETE_DELIVERY);

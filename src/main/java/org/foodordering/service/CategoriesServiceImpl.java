@@ -9,9 +9,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class CategoriesServiceImpl extends AbstractService implements CategoriesService {
-    PreparedStatement ps =null;
-    ResultSet rs = null;
-    Connection conn = null;
+
 
     @Override
     public void addCategory(Category category) throws Exception {
@@ -19,6 +17,8 @@ public class CategoriesServiceImpl extends AbstractService implements Categories
         if(validate != null){
             throw new Exception(validate);
         }
+        PreparedStatement ps = null;
+        Connection conn = null;
 
         try  {
             conn = getConnection();
@@ -32,11 +32,13 @@ public class CategoriesServiceImpl extends AbstractService implements Categories
     }
     @Override
     public List<Category> getAllCategories() throws Exception {
-
+        PreparedStatement ps = null;
+        Connection conn = null;
+        ResultSet rs = null;
         try  {
             conn = getConnection();
             ps = conn.prepareStatement(Sql.GET_ALL_CATEGORIES);
-            ResultSet rs = ps.executeQuery();
+            rs = ps.executeQuery();
             List<Category> categories = new ArrayList<>();
             while(rs.next()) {
                 Category category = new Category();
@@ -54,6 +56,9 @@ public class CategoriesServiceImpl extends AbstractService implements Categories
         if(validate != null){
             throw new Exception(validate);
         }
+        PreparedStatement ps = null;
+        Connection conn = null;
+
         try {
             conn = getConnection();
             ps = conn.prepareStatement(Sql.UPDATE_CATEGORY);
@@ -66,6 +71,8 @@ public class CategoriesServiceImpl extends AbstractService implements Categories
     }
     @Override
     public void deleteCategory(Category category) throws Exception {
+        PreparedStatement ps = null;
+        Connection conn = null;
         try{
             conn = getConnection();
             ps = conn.prepareStatement(Sql.DELETE_CATEGORY);
@@ -77,12 +84,14 @@ public class CategoriesServiceImpl extends AbstractService implements Categories
     }
     @Override
     public Category getCategoryById(int id) throws Exception {
-
+        PreparedStatement ps = null;
+        Connection conn = null;
+        ResultSet rs = null;
         try {
             conn = getConnection();
             ps = conn.prepareStatement(Sql.GET_CATEGORY_BY_ID);
             ps.setInt(1, id);
-            ResultSet rs = ps.executeQuery();
+            rs = ps.executeQuery();
             Category category = new Category();
             while(rs.next()) {
                 category.setId(rs.getInt("id"));
@@ -94,10 +103,13 @@ public class CategoriesServiceImpl extends AbstractService implements Categories
     }
     public List<Category> getByName(String name) throws SQLException {
         final String query = "SELECT * FROM category WHERE name LIKE '"+name+"%' ";
+        PreparedStatement ps = null;
+        Connection conn = null;
+        ResultSet rs = null;
         try {
             conn = getConnection();
             ps = conn.prepareStatement(query);
-            ResultSet rs = ps.executeQuery();
+            rs = ps.executeQuery();
             List<Category> categories = new ArrayList<>();
             while(rs.next()) {
                 Category category = new Category();

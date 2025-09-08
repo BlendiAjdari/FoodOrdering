@@ -3,8 +3,7 @@ package org.foodordering.resource;
 import org.foodordering.common.AbstractResource;
 import org.foodordering.domain.Checkout;
 import org.foodordering.domain.OrderItem;
-import org.foodordering.service.CheckoutService;
-import org.foodordering.service.CheckoutServiceImpl;
+import org.foodordering.service.*;
 
 import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
@@ -15,6 +14,8 @@ import java.util.List;
 @Path("/Checkout")
 public class CheckoutResource extends AbstractResource {
     CheckoutService checkoutService = new CheckoutServiceImpl();
+    AddressService  addressService = new AddressServiceImpl();
+    OrderService orderService = new OrderServiceImpl();
    @POST
    @Path("/insert")
    @Produces(MediaType.APPLICATION_JSON)
@@ -23,7 +24,9 @@ public class CheckoutResource extends AbstractResource {
        Checkout checkout = gson().fromJson(payload, Checkout.class);
        checkout.setId(checkout.getId());
        checkout.setCustomer_id(checkout.getCustomer_id());
-       checkout.setAddress(checkout.getAddress());
+       checkout.setAddress_id(addressService.getAddressByCustomerId(checkout.getCustomer_id()).getId());
+       checkout.setAddress(addressService.getAddressByCustomerId(checkout.getCustomer_id()));
+       checkout.setTotalAmount(orderService.orderAmountByCustomerId(checkout.getCustomer_id()));
        checkoutService.addCheckout(checkout);
        return Response.ok(gson().toJson(checkout)).build();
    }
@@ -40,7 +43,9 @@ public class CheckoutResource extends AbstractResource {
        Checkout checkout = gson().fromJson(payload, Checkout.class);
        checkout.setId(id);
        checkout.setCustomer_id(checkout.getCustomer_id());
-       checkout.setAddress_id(checkout.getAddress_id());
+       checkout.setAddress_id(addressService.getAddressByCustomerId(checkout.getCustomer_id()).getId());
+       checkout.setAddress(addressService.getAddressByCustomerId(checkout.getCustomer_id()));
+       checkout.setTotalAmount(orderService.orderAmountByCustomerId(checkout.getCustomer_id()));
        checkoutService.updateCheckout(checkout);
        return Response.ok(gson().toJson(checkout)).build();
    }
@@ -49,7 +54,7 @@ public class CheckoutResource extends AbstractResource {
     @Consumes(MediaType.APPLICATION_JSON)
     public Response deleteCheckout(Checkout checkout) throws Exception {
        checkoutService.deleteCheckout(checkout);
-       return Response.ok().build();
+       return Response.ok("Deleted").build();
    }
    @GET
    @Path("/{id}")

@@ -10,11 +10,12 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class AddressServiceImpl extends AbstractService implements AddressService {
-    PreparedStatement ps = null;
-    ResultSet rs = null;
-    Connection conn = null;
+
     @Override
     public List<Address> getAddresses() throws Exception {
+        PreparedStatement ps = null;
+        Connection conn = null;
+        ResultSet rs = null;
         try {
             conn = getConnection();
             ps = conn.prepareStatement(Sql.GET_ALL_ADDRESSES);
@@ -38,6 +39,9 @@ public class AddressServiceImpl extends AbstractService implements AddressServic
 
     @Override
     public Address getAddressById(int id) throws Exception {
+        PreparedStatement ps = null;
+        Connection conn = null;
+        ResultSet rs = null;
         try {
             conn = getConnection();
             ps = conn.prepareStatement(Sql.GET_ADDRESS_BY_ID);
@@ -63,6 +67,9 @@ public class AddressServiceImpl extends AbstractService implements AddressServic
         if(validate != null){
             throw new Exception(validate);
         }
+        PreparedStatement ps = null;
+        Connection conn = null;
+        ResultSet rs = null;
          try {
             conn = getConnection();
             ps = conn.prepareStatement(Sql.SAVE_ADDRESS);
@@ -83,6 +90,8 @@ public class AddressServiceImpl extends AbstractService implements AddressServic
         if(validate != null){
             throw new Exception(validate);
         }
+        PreparedStatement ps = null;
+        Connection conn = null;
         try {
             conn = getConnection();
             ps = conn.prepareStatement(Sql.UPDATE_ADDRESS);
@@ -102,6 +111,8 @@ public class AddressServiceImpl extends AbstractService implements AddressServic
 
     @Override
     public void deleteAddress(Address address) throws Exception {
+        PreparedStatement ps = null;
+        Connection conn = null;
       try {
             conn = getConnection();
             ps = conn.prepareStatement(Sql.DELETE_ADDRESS);
@@ -114,6 +125,9 @@ public class AddressServiceImpl extends AbstractService implements AddressServic
 
     @Override
     public Address getAddressByCustomerId(int id) throws Exception {
+        PreparedStatement ps = null;
+        Connection conn = null;
+        ResultSet rs = null;
         try {
             conn = getConnection();
             ps = conn.prepareStatement(Sql.GET_ADDRESS_BY_CUSTOMER_ID);

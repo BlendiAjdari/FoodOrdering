@@ -20,6 +20,7 @@ public class CatalogueResource extends AbstractResource {
 
     @GET
     @Produces(MediaType.APPLICATION_JSON)
+    @Consumes(MediaType.APPLICATION_JSON)
     public Response getCatalogue() throws Exception {
         List<Map<String, Object>> result = new ArrayList<>();
         List<Store> stores = new ArrayList<>(storeService.getAllStores());
@@ -56,7 +57,7 @@ public class CatalogueResource extends AbstractResource {
     @Produces(MediaType.APPLICATION_JSON)
     public Response searchStore(@QueryParam("name")String name) throws Exception {
         StoreServiceImpl storeService=new StoreServiceImpl();
-        return Response.ok(storeService.searchStore(name)).build();
+        return Response.ok(gson().toJson(storeService.searchStore(name))).build();
     }
     @GET
     @Path("/Categories")
@@ -65,43 +66,7 @@ public class CatalogueResource extends AbstractResource {
         List<Category> categories = new ArrayList<>(categoryService.getAllCategories());
         return Response.ok(gson().toJson(categories)).build();
     }
-    @POST
-    @Path("/Categories/insert")
-    @Consumes(MediaType.APPLICATION_JSON)
-    @Produces(MediaType.APPLICATION_JSON)
-    public Response addCategory(String payload) throws Exception{
-        Category category = gson().fromJson(payload,Category.class);
-        category.setId(category.getId());
-        category.setName(category.getName());
-        categoryService.addCategory(category);
-        return Response.ok(category).build();
-    }
-    @DELETE
-    @Path("/Categories")
-    @Consumes(MediaType.APPLICATION_JSON)
-    public Response deleteCategory(Category category) throws Exception{
-        categoryService.deleteCategory(category);
-        return Response.ok().build();
-    }
-    @PUT
-    @Path("/Categories/{id}/update")
-    @Consumes(MediaType.APPLICATION_JSON)
-    @Produces(MediaType.APPLICATION_JSON)
-    public Response updateCategory(@PathParam("id") int id ,String payload) throws Exception{
-        Category category = gson().fromJson(payload,Category.class);
-        category.setId(category.getId());
-        category.setName(category.getName());
-        categoryService.updateCategory(category);
-        return Response.ok(category).build();
 
-    }
-    @GET
-    @Path("/Categories/{id}")
-    @Produces(MediaType.APPLICATION_JSON)
-    public Response getCategory(@PathParam("id") int id) throws Exception{
-        Category category = categoryService.getCategoryById(id);
-        return Response.ok(category).build();
-    }
     @GET
     @Path("/Categories/search")
     @Produces(MediaType.APPLICATION_JSON)
@@ -115,58 +80,9 @@ public class CatalogueResource extends AbstractResource {
     @Produces(MediaType.APPLICATION_JSON)
     public Response getProducts() throws Exception{
         List<Product> p = new ArrayList<>(productService.getAllProducts());
-        return Response.ok(p).build();
+        return Response.ok(gson().toJson(p)).build();
     }
-    @POST
-    @Path("/Products/insert")
-    @Consumes(MediaType.APPLICATION_JSON)
-    @Produces(MediaType.APPLICATION_JSON)
-    public Response addProduct(String payload) throws Exception{
-        Product product = gson().fromJson(payload,Product.class);
-        product.setId( product.getId());
-        product.setName( product.getName());
-        product.setDescription( product.getDescription());
-        product.setPrice(product.getPrice());
-        product.setStock_quantity(product.getStock_quantity());
-        product.setStore_id(product.getStore_id());
-        product.setStore(storeService.getStoreById((product.getStore_id())));
-        product.setCategory_id(product.getCategory_id());
-        product.setCategory( categoryService.getCategoryById(product.getCategory_id()));
-        productService.addProduct(product);
-        return Response.ok(product).build();
-    }
-    @PUT
-    @Path("/Products/{id}/update")
-    @Consumes(MediaType.APPLICATION_JSON)
-    @Produces(MediaType.APPLICATION_JSON)
-    public Response updateProduct(@PathParam("id") int id ,String payload) throws Exception{
-        Product product = gson().fromJson(payload,Product.class);
-        product.setId( product.getId());
-        product.setName( product.getName());
-        product.setDescription( product.getDescription());
-        product.setPrice(product.getPrice());
-        product.setStock_quantity(product.getStock_quantity());
-        product.setStore_id(product.getStore_id());
-        product.setStore(storeService.getStoreById(product.getStore_id()));
-        product.setCategory_id(product.getCategory_id());
-        product.setCategory( categoryService.getCategoryById(product.getCategory_id()));
-        productService.updateProduct(product);
-        return Response.ok(product).build();
-    }
-    @DELETE
-    @Path("/Products/delete")
-    @Consumes(MediaType.APPLICATION_JSON)
-    public Response deleteProduct(Product product) throws Exception{
-        productService.deleteProduct(product);
-        return Response.ok().build();
-    }
-    @GET
-    @Path("/Products/{id}")
-    @Produces(MediaType.APPLICATION_JSON)
-    public Response getProduct(@PathParam("id") int id) throws Exception{
-        Product product = productService.getProductById(id);
-        return Response.ok(product).build();
-    }
+
     @GET
     @Path("/Products/search")
     @Produces(MediaType.APPLICATION_JSON)

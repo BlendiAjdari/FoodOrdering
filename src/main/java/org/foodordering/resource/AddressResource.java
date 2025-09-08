@@ -52,7 +52,7 @@ public class AddressResource extends AbstractResource {
     @Produces(MediaType.APPLICATION_JSON)
     public Response deleteAddress(Address address) throws Exception {
         addressService.deleteAddress(address);
-        return Response.ok(gson().toJson(address)).build();
+        return Response.ok("Deleted").build();
     }
     @GET
     @Path("/{id}")

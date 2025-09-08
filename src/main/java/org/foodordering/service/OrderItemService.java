@@ -14,6 +14,7 @@ public interface OrderItemService {
     void updateOrderItem(OrderItem orderItem) throws Exception;
     void deleteOrderItem(OrderItem orderItem) throws Exception;
     List<OrderItem> getOrderItemsByOrderId(int id) throws Exception;
-    BigDecimal totalAmount(OrderItem orderitem) throws Exception;
     void deleteAllOrderItemsByOrderId(List<Order> orders) throws Exception;
+
+    List<OrderItem> getOrderItemsByStoreId(int id) throws Exception;
 }

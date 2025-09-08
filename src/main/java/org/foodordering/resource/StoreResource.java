@@ -4,16 +4,16 @@ package org.foodordering.resource;
 import org.foodordering.common.AbstractResource;
 import org.foodordering.domain.Category;
 import org.foodordering.domain.Order;
+import org.foodordering.domain.OrderItem;
 import org.foodordering.domain.Store;
 
 import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
+import java.util.ArrayList;
 import java.util.List;
 
-import org.foodordering.service.OrderService;
-import org.foodordering.service.OrderServiceImpl;
-import org.foodordering.service.StoreServiceImpl;
+import org.foodordering.service.*;
 
 
 @Path("/Stores")
@@ -49,7 +49,7 @@ public class StoreResource extends AbstractResource {
     @Produces(MediaType.APPLICATION_JSON)
     public Response deleteStore(Store store) throws Exception {
         storeService.deleteStore(store);
-        return Response.ok().build();
+        return Response.ok("Deleted").build();
 
 
     }
@@ -67,7 +67,7 @@ public class StoreResource extends AbstractResource {
         store.setOpens(store.getOpens());
         store.setCloses(store.getCloses());
         storeService.updateStore(store);
-        return Response.ok().build();
+        return Response.ok(gson().toJson(store)).build();
     }
     @GET
     @Path("/{id}")
@@ -84,6 +84,15 @@ public class StoreResource extends AbstractResource {
         OrderService orderService = new OrderServiceImpl();
         List<Order> ordersByStore =orderService.ordersByStore(id);
         return Response.ok(gson().toJson(ordersByStore)).build();
+    }
+    @GET
+    @Path("/Sales_Report/{id}")
+    @Produces(MediaType.APPLICATION_JSON)
+    public Response getStoreSalesReports(@PathParam("id")int id) throws Exception {
+        OrderItemService orderItemService = new OrderItemServiceImpl();
+        List<OrderItem> orderItems = new ArrayList<OrderItem>();
+        orderItems.addAll(orderItemService.getOrderItemsByStoreId(id));
+        return Response.ok(gson().toJson(orderItems)).build();
     }
 
 

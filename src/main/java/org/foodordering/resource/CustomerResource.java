@@ -43,18 +43,19 @@ public class CustomerResource extends AbstractResource {
     @Consumes(MediaType.APPLICATION_JSON)
     public Response putCostumer(@PathParam("id") int id, String payload) throws Exception {
         Customer customer = gson().fromJson(payload,Customer.class);
+        customer.setId(id);
         customer.setName(customer.getName());
         customer.setEmail(customer.getEmail());
         customer.setPhone(customer.getPhone());
         customerService.updateCustomer(customer);
-        return Response.ok().build();
+        return Response.ok(gson().toJson(customer)).build();
     }
     @DELETE
     @Path("/delete")
     @Consumes(MediaType.APPLICATION_JSON)
     public Response deleteCostumers(Customer customer) throws Exception {
         customerService.deleteCustomer(customer);
-        return Response.ok().build();
+        return Response.ok("Deleted").build();
     }
     @GET
     @Path("/{id}")

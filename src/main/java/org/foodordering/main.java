@@ -7,13 +7,14 @@ import org.foodordering.domain.Encryption;
 import org.foodordering.domain.Product;
 import org.foodordering.service.*;
 
-import java.util.HashSet;
-import java.util.Set;
+import java.time.YearMonth;
+import java.time.format.DateTimeFormatter;
+import java.sql.Date;
+import java.util.*;
 
 
 public class main extends AbstractResource {
     public static void main(String[] args)  throws Exception {
-        OrderService orderService = new OrderServiceImpl();
-        System.out.println(orderService.orderAmountByCustomerId(5));
+
     }
 }

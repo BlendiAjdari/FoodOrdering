@@ -11,11 +11,11 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class CardServiceImpl extends AbstractService implements CardService {
-    PreparedStatement ps = null;
-    ResultSet rs = null;
-    Connection conn = null;
     @Override
     public List<Card> getCards() throws Exception {
+        PreparedStatement ps = null;
+        Connection conn = null;
+        ResultSet rs = null;
         try{
             conn=getConnection();
             ps=conn.prepareStatement(Sql.GET_CARDS);
@@ -39,6 +39,9 @@ public class CardServiceImpl extends AbstractService implements CardService {
 
     @Override
     public Card getCardById(int id) throws Exception {
+        PreparedStatement ps = null;
+        Connection conn = null;
+        ResultSet rs = null;
         try {
             conn=getConnection();
             ps=conn.prepareStatement(Sql.GET_CARD_BY_ID);
@@ -66,6 +69,9 @@ public class CardServiceImpl extends AbstractService implements CardService {
         if(validate != null){
             throw new Exception(validate);
         }
+        PreparedStatement ps = null;
+        Connection conn = null;
+        ResultSet rs = null;
      try {
             conn=getConnection();
             ps = conn.prepareStatement(Sql.SAVE_CARD);
@@ -88,6 +94,9 @@ public class CardServiceImpl extends AbstractService implements CardService {
         if(validate != null){
             throw new Exception(validate);
         }
+        PreparedStatement ps = null;
+        Connection conn = null;
+        ResultSet rs = null;
         try {
             conn=getConnection();
             ps = conn.prepareStatement(Sql.UPDATE_CARD);
@@ -106,6 +115,8 @@ public class CardServiceImpl extends AbstractService implements CardService {
 
     @Override
     public void deleteCard(Card card) throws Exception {
+        PreparedStatement ps = null;
+        Connection conn = null;
         try {
             conn=getConnection();
             ps = conn.prepareStatement(Sql.DELETE_CARD);
@@ -120,6 +131,9 @@ public class CardServiceImpl extends AbstractService implements CardService {
 
     @Override
     public boolean cardCheck(Card card) throws Exception{
+        PreparedStatement ps = null;
+        Connection conn = null;
+        ResultSet rs = null;
         try {
             conn = getConnection();
             ps =conn.prepareStatement(Sql.COMPARE_CARD_DETAILS);

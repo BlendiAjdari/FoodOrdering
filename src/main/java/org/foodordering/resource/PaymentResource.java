@@ -47,13 +47,13 @@ public class PaymentResource extends AbstractResource {
             payment.setId(payment.getId());
             payment.setCustomerId(payment.getCustomerId());
             BigDecimal totalAmount = orderService.orderAmountByCustomerId(payment.getCustomerId());
-            payment.setAmount(totalAmount.add(totalAmount.multiply(BigDecimal.valueOf(0.18))));//taksa
+            payment.setAmount(totalAmount);
             payment.setMethod(method);
             payment.setStatus(payment.getStatus());
             payment.setOrders(orderService.getOrdersByCustomerId(payment.getCustomerId()));
             payment.setDate(Date.valueOf(LocalDate.now()));
             paymentService.addPayment(payment);
-        return Response.ok(gson().toJson(payment)).build();}
+        return Response.ok(gson().toJson("Payment will be done at hand")).build();}
 
         if(method.equals("Card")) {
             Payment payment = gson().fromJson(payload, Payment.class);
@@ -61,13 +61,12 @@ public class PaymentResource extends AbstractResource {
             payment.setCustomerId(payment.getCustomerId());
             payment.setCard_id(payment.getCard_id());
             BigDecimal totalAmount = orderService.orderAmountByCustomerId(payment.getCustomerId());
-            payment.setAmount(totalAmount.add(totalAmount.multiply(BigDecimal.valueOf(0.18))));//taksa
+            payment.setAmount(totalAmount);
             payment.setMethod(method);
             payment.setStatus(payment.getStatus());
             payment.setOrders(orderService.getOrdersByCustomerId(payment.getCustomerId()));
             payment.setDate(Date.valueOf(LocalDate.now()));
             if(payment.getCard_id()!=0){
-
 
             Card card1 = gson().fromJson(payload, Card.class);
             card1.setCardNumber(card1.getCardNumber());
@@ -80,7 +79,7 @@ public class PaymentResource extends AbstractResource {
                     paymentService.addPayment(payment);
                     return Response.ok(gson().toJson(payment)).build();
             } else {
-                    return Response.ok(gson().toJson("Wrong Credit Card Details!")).build();
+                    return Response.status(401).entity("Incorrect card details!").build();
             }}
             else {
                 throw new Exception("Card id cannot be empty");
@@ -93,7 +92,7 @@ public class PaymentResource extends AbstractResource {
             payment.setE_walletId(payment.getE_walletId());
             payment.setCustomerId(payment.getCustomerId());
             BigDecimal totalAmount = orderService.orderAmountByCustomerId(payment.getCustomerId());
-            payment.setAmount(totalAmount.add(totalAmount.multiply(BigDecimal.valueOf(0.18))));//taksa
+            payment.setAmount(totalAmount);
             payment.setMethod(method);
             payment.setStatus(payment.getStatus());
             payment.setOrders(orderService.getOrdersByCustomerId(payment.getCustomerId()));
@@ -115,16 +114,16 @@ public class PaymentResource extends AbstractResource {
                     paymentService.addPayment(payment);
                     return Response.ok(gson().toJson(payment)).build();
                 }else{
-                    return Response.ok(gson().toJson("Wrong E-Wallet Details!")).build();
+                    return Response.status(401).entity("Incorrect E-Wallet details!").build();
                 }
             }else{
-                throw new Exception("Ewallet id cannot be empty");
+                throw new Exception("E-wallet id cannot be empty");
             }
 
 
         }
         else {
-            return Response.ok(gson().toJson("Payment method not allowed")).build();
+            return Response.status(405).entity(gson().toJson("Payment method not allowed")).build();
         }
 
     }
@@ -140,7 +139,7 @@ public class PaymentResource extends AbstractResource {
     @Produces(MediaType.APPLICATION_JSON)
     public Response deletePaymentById(Payment payment) throws Exception {
         paymentService.deletePayment(payment);
-        return Response.ok().build();
+        return Response.ok("Deleted").build();
     }
 
     @PUT
@@ -152,6 +151,7 @@ public class PaymentResource extends AbstractResource {
         payment.setId(id);
         payment.setCustomerId(payment.getCustomerId());
         payment.setCard_id(payment.getCard_id());
+        payment.setE_walletId(payment.getE_walletId());
         payment.setAmount(payment.getAmount());
         payment.setMethod(payment.getMethod());
         payment.setStatus(payment.getStatus());

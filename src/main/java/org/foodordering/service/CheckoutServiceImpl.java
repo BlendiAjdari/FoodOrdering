@@ -14,15 +14,16 @@ import java.util.List;
 import java.util.Set;
 
 public class CheckoutServiceImpl extends AbstractService implements CheckoutService{
-    PreparedStatement ps = null;
-    ResultSet rs = null;
-    Connection conn = null;
+
     OrderService orderService = new OrderServiceImpl();
     CustomerService customerService = new CustomerServiceImpl();
     AddressService addressService = new AddressServiceImpl();
     OrderItemService orderItemService = new OrderItemServiceImpl();
     @Override
     public List<Checkout> getCheckouts() throws Exception {
+        PreparedStatement ps = null;
+        Connection conn = null;
+        ResultSet rs = null;
         try {
             conn = getConnection();
             ps = conn.prepareStatement(Sql.GET_ALL_CHECKOUTS);
@@ -54,6 +55,9 @@ public class CheckoutServiceImpl extends AbstractService implements CheckoutServ
 
     @Override
     public Checkout getCheckoutById(int id) throws Exception {
+        PreparedStatement ps = null;
+        Connection conn = null;
+        ResultSet rs = null;
         try {
             conn = getConnection();
             ps = conn.prepareStatement(Sql.GET_CHECKOUT_BY_ID);
@@ -90,11 +94,19 @@ public class CheckoutServiceImpl extends AbstractService implements CheckoutServ
             throw new Exception(validate);
         }
 
+        PreparedStatement ps = null;
+        Connection conn = null;
+        OrderService orderService1 = new OrderServiceImpl();
+
+
         try {
             conn = getConnection();
             ps = conn.prepareStatement(Sql.SAVE_CHECKOUT);
             ps.setInt(1, checkout.getId());
             ps.setInt(2, checkout.getCustomer_id());
+            if (orderService.getOrdersByCustomerId(checkout.getCustomer_id()).isEmpty()) {
+                throw new Exception("Can't checkout without an Order!");
+            }
             ps.setInt(3, checkout.getAddress_id());
             ps.setBigDecimal(4, orderService.orderAmountByCustomerId(checkout.getCustomer_id()));
             ps.executeUpdate();
@@ -110,6 +122,9 @@ public class CheckoutServiceImpl extends AbstractService implements CheckoutServ
         if(validate != null){
             throw new Exception(validate);
         }
+        PreparedStatement ps = null;
+        Connection conn = null;
+
      try {
          conn = getConnection();
          ps = conn.prepareStatement(Sql.UPDATE_CHECKOUT);
@@ -125,6 +140,9 @@ public class CheckoutServiceImpl extends AbstractService implements CheckoutServ
 
     @Override
     public void deleteCheckout(Checkout checkout) throws Exception {
+        PreparedStatement ps = null;
+        Connection conn = null;
+
        try {
             conn = getConnection();
             ps = conn.prepareStatement(Sql.DELETE_CHECKOUT);
@@ -137,6 +155,9 @@ public class CheckoutServiceImpl extends AbstractService implements CheckoutServ
 
     @Override
     public int getLastCheckoutId() throws Exception {
+        PreparedStatement ps = null;
+        Connection conn = null;
+        ResultSet rs = null;
         try{
             conn = getConnection();
             ps = conn.prepareStatement(Sql.GET_LAST_CHECKOUT_ID);
@@ -151,6 +172,8 @@ public class CheckoutServiceImpl extends AbstractService implements CheckoutServ
 
     @Override
     public void deleteCheckoutByCustomerId(int customerId) throws Exception {
+        PreparedStatement ps = null;
+        Connection conn = null;
 
         try {
             conn = getConnection();
@@ -164,6 +187,9 @@ public class CheckoutServiceImpl extends AbstractService implements CheckoutServ
 
     @Override
     public int getCheckoutIdByCustomerId(int customerId) throws Exception {
+        PreparedStatement ps = null;
+        Connection conn = null;
+        ResultSet rs = null;
         try {
             conn = getConnection();
             ps = conn.prepareStatement(Sql.GET_ID_FROM_CUSTOMER_ID);

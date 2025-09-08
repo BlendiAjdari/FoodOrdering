@@ -3,10 +3,10 @@ package org.foodordering.common;
 import com.google.gson.annotations.SerializedName;
 
 public abstract class AbstractEntity {
-    @SerializedName("id") //since each POJO has id, we can abstract it away in this class
+    @SerializedName("id")
     private int id;
 
-    public abstract String validate(); // used to validate json request payload for missing/invalid fields
+    public abstract String validate();
 
     public boolean equals(Object obj) {
         if (obj == null) {

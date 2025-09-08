@@ -1,7 +1,6 @@
 package org.foodordering.domain;
 
 import com.google.gson.annotations.SerializedName;
-import org.foodordering.Base;
 import org.foodordering.common.AbstractEntity;
 
 import javax.xml.crypto.Data;
@@ -97,7 +96,7 @@ public class Payment extends AbstractEntity {
             return "Date cannot be null";
         }
         if ( method==null||method.isEmpty()){
-            return "Method not allowed";
+            return "Method can't be empty";
         }
         else if(method.equals("Card")||method.equals("E-Wallet")||method.equals("Cash")) {
 

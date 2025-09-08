@@ -30,11 +30,13 @@ public class DeliveryResource extends AbstractResource {
         delivery.setId(delivery.getId());
         delivery.setCustomer_id(delivery.getCustomer_id());
         delivery.setOrders(orderService.getOrdersByCustomerId(delivery.getCustomer_id()));
+
         delivery.setCourier_id(delivery.getCourier_id());
         delivery.setCourier(courierService.getCourierById(delivery.getCourier_id()));
         delivery.setStatus(delivery.getStatus());
         delivery.setPickup_time(delivery.getPickup_time());
         delivery.setDelivery_time(delivery.getDelivery_time());
+
         deliveryService.addDelivery(delivery);
         return Response.ok(gson().toJson(delivery)).build();
     }
@@ -45,7 +47,7 @@ public class DeliveryResource extends AbstractResource {
     @Consumes(MediaType.APPLICATION_JSON)
     public Response updateDelivery(@PathParam("id") int id, String payload) throws Exception {
         Delivery delivery = gson().fromJson(payload, Delivery.class);
-        delivery.setId(delivery.getId());
+        delivery.setId(id);
         delivery.setCustomer_id(delivery.getCustomer_id());
         delivery.setOrders(orderService.getOrdersByCustomerId(delivery.getCustomer_id()));
         delivery.setCourier_id(delivery.getCourier_id());
@@ -53,6 +55,7 @@ public class DeliveryResource extends AbstractResource {
         delivery.setStatus(delivery.getStatus());
         delivery.setPickup_time(delivery.getPickup_time());
         delivery.setDelivery_time(delivery.getDelivery_time());
+        deliveryService.updateDelivery(delivery);
         return Response.ok(gson().toJson(delivery)).build();
 
     }
@@ -61,7 +64,7 @@ public class DeliveryResource extends AbstractResource {
     @Produces(MediaType.APPLICATION_JSON)
     public Response deleteDelivery(Delivery delivery) throws Exception {
         deliveryService.deleteDelivery(delivery);
-        return  Response.ok().build();
+        return  Response.ok("Deleted").build();
     }
     @GET
     @Path("/{id}")

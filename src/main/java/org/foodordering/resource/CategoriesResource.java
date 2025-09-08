@@ -11,7 +11,7 @@ import javax.ws.rs.core.Response;
 import java.util.ArrayList;
 import java.util.List;
 
-@Path("/categories")
+@Path("/Categories")
 public class CategoriesResource extends AbstractResource {
     CategoriesService categoryService = new CategoriesServiceImpl();
     @GET
@@ -36,7 +36,7 @@ public class CategoriesResource extends AbstractResource {
     @Consumes(MediaType.APPLICATION_JSON)
     public Response deleteCategory(Category category) throws Exception{
         categoryService.deleteCategory(category);
-        return Response.ok().build();
+        return Response.ok("Deleted").build();
     }
     @PUT
     @Path("/{id}/update")
@@ -44,7 +44,7 @@ public class CategoriesResource extends AbstractResource {
     @Produces(MediaType.APPLICATION_JSON)
     public Response updateCategory(@PathParam("id") int id ,String payload) throws Exception{
         Category category = gson().fromJson(payload,Category.class);
-        category.setId(category.getId());
+        category.setId(id);
         category.setName(category.getName());
         categoryService.updateCategory(category);
         return Response.ok(gson().toJson(category)).build();

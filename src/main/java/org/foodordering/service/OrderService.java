@@ -12,10 +12,8 @@ public interface OrderService {
     void  addOrder(Order order) throws Exception;
     void updateOrder(Order order) throws Exception;
     void deleteOrder(Order order) throws Exception;
-    int getCustomerIdFromCart() throws Exception;
-     int StoreIdFromProduct(int id) throws Exception;
-    public void amountChange(int id) throws Exception;
-    public BigDecimal totalAmount(int id) throws Exception;
+     void amountChange(int id) throws Exception;
+     BigDecimal totalAmount(int id) throws Exception;
     BigDecimal getAmount(int id)throws Exception;
     void deleteAmount(int id) throws Exception;
     int lastOrderId() throws Exception;

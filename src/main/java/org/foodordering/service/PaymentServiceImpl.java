@@ -6,18 +6,18 @@ import org.foodordering.domain.Order;
 import org.foodordering.domain.Payment;
 
 import javax.xml.crypto.Data;
+import java.math.BigDecimal;
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
 
 public class PaymentServiceImpl extends AbstractService implements PaymentService {
 
-    private PreparedStatement ps=null;
-    private ResultSet rs=null;
-    private Connection conn=null;
     OrderService orderService=new OrderServiceImpl();
     @Override
     public void addPayment(Payment payment) throws Exception {
+        PreparedStatement ps = null;
+        Connection conn = null;
         String validate = payment.validate();
         if(validate != null){
             throw new Exception(validate);
@@ -33,7 +33,10 @@ public class PaymentServiceImpl extends AbstractService implements PaymentServic
             ps.setString(6,payment.getMethod());
             ps.setString(7,payment.getStatus());
             ps.setDate(8, payment.getDate());
-            ps.executeUpdate();
+            if(payment.getAmount().equals(new BigDecimal("0.00"))){
+                throw new Exception("Payment cant be done , if no Orders!");
+            }else{
+            ps.executeUpdate();}
         }finally {
             close(ps,conn);
         }
@@ -41,10 +44,13 @@ public class PaymentServiceImpl extends AbstractService implements PaymentServic
     }
     @Override
     public List<Payment> getAllPayments() throws Exception {
+        PreparedStatement ps = null;
+        Connection conn = null;
+        ResultSet rs = null;
         try {
             conn=getConnection();
             ps=conn.prepareStatement(Sql.GET_ALL_PAYMENTS);
-            ResultSet rs = ps.executeQuery();
+            rs = ps.executeQuery();
             List<Payment> payments2 = new ArrayList<>();
 
             while(rs.next()) {
@@ -70,7 +76,8 @@ public class PaymentServiceImpl extends AbstractService implements PaymentServic
     }
     @Override
     public void deletePayment(Payment payment) throws Exception {
-
+        PreparedStatement ps = null;
+        Connection conn = null;
         try{
             conn=getConnection();
             ps = conn.prepareStatement(Sql.DELETE_PAYMENT);
@@ -84,6 +91,8 @@ public class PaymentServiceImpl extends AbstractService implements PaymentServic
 
     @Override
     public void deletePaymentByCustomerId(int checkoutId) throws Exception {
+        PreparedStatement ps = null;
+        Connection conn = null;
         try {
             conn=getConnection();
             ps=conn.prepareStatement(Sql.DELETE_PAYMENT_BY_CUSTOMER_ID);
@@ -98,11 +107,14 @@ public class PaymentServiceImpl extends AbstractService implements PaymentServic
 
     @Override
     public Payment getPaymentById(int id) throws Exception {
+        PreparedStatement ps = null;
+        Connection conn = null;
+        ResultSet rs = null;
         try{
             conn=getConnection();
             ps = conn.prepareStatement(Sql.GET_PAYMENT_BY_ID);
             ps.setInt(1, id);
-            ResultSet rs = ps.executeQuery();
+            rs = ps.executeQuery();
             if (rs.next()) {
                 Payment payment = new Payment();
                 payment.setId(rs.getInt("id"));
@@ -124,6 +136,8 @@ public class PaymentServiceImpl extends AbstractService implements PaymentServic
 
     @Override
     public void updatePayment(Payment payment) throws Exception {
+        PreparedStatement ps = null;
+        Connection conn = null;
         String validate = payment.validate();
         if(validate != null){
             throw new Exception(validate);

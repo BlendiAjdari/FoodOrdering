@@ -1,25 +1,20 @@
 package org.foodordering.service;
 
 import org.foodordering.common.AbstractService;
-import org.foodordering.common.TotalAmountException;
 import org.foodordering.domain.Order;
 import org.foodordering.domain.OrderItem;
 
-import java.math.BigDecimal;
 import java.sql.*;
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 
 public class OrderItemServiceImpl extends AbstractService implements OrderItemService {
-    PreparedStatement ps = null;
-    ResultSet rs = null;
-    Connection conn = null;
     OrderServiceImpl orderService = new OrderServiceImpl();
     ProductServiceImpl  productService = new ProductServiceImpl();
     @Override
     public void addOrderItem(OrderItem orderitem) throws Exception {
+        PreparedStatement ps = null;
+        Connection conn = null;
         String validate = orderitem.validate();
         if(validate != null){
             throw new Exception(validate);
@@ -45,6 +40,9 @@ public class OrderItemServiceImpl extends AbstractService implements OrderItemSe
     }
     @Override
     public List<OrderItem> getAllOrderItems() throws Exception {
+        PreparedStatement ps = null;
+        Connection conn = null;
+        ResultSet rs = null;
         try {
             conn = getConnection();
             ps = conn.prepareStatement(Sql.GET_ALL_ORDERED_ITEMS);
@@ -68,6 +66,8 @@ public class OrderItemServiceImpl extends AbstractService implements OrderItemSe
     }
     @Override
     public void updateOrderItem(OrderItem orderItem) throws Exception {
+        PreparedStatement ps = null;
+        Connection conn = null;
         String validate = orderItem.validate();
         if(validate != null){
             throw new Exception(validate);
@@ -91,7 +91,9 @@ public class OrderItemServiceImpl extends AbstractService implements OrderItemSe
     }
     @Override
     public void deleteOrderItem(OrderItem orderItem) throws Exception {
-        orderService.deleteAmount(orderItem.getOrder_id());
+        PreparedStatement ps = null;
+        Connection conn = null;
+        orderService.deleteAmount(getOrderItemById(orderItem.getId()).getOrder_id());
         try{
 
             conn = getConnection();
@@ -107,6 +109,9 @@ public class OrderItemServiceImpl extends AbstractService implements OrderItemSe
 
     @Override
     public List<OrderItem> getOrderItemsByOrderId(int id) throws Exception {
+        PreparedStatement ps = null;
+        Connection conn = null;
+        ResultSet rs = null;
         try {
             conn = getConnection();
             ps = conn.prepareStatement(Sql.GET_BY_ORDER_ID);
@@ -133,6 +138,8 @@ public class OrderItemServiceImpl extends AbstractService implements OrderItemSe
 
     @Override
     public OrderItem getOrderItemById(int id) throws Exception {
+        PreparedStatement ps = null;
+        Connection conn = null;
 
         try {
             conn = getConnection();
@@ -154,20 +161,11 @@ public class OrderItemServiceImpl extends AbstractService implements OrderItemSe
             close(ps,conn);
         }return null;
     }
-    @Override
-    public BigDecimal totalAmount(OrderItem orderitem) throws Exception {
-        if(orderitem !=null){
-        if(orderitem.getUnit_price() != null && orderitem.getQuantity()!=0 ){
-            return  orderitem.getUnit_price().multiply(new BigDecimal(orderitem.getQuantity()));
-        }else {
-            throw new TotalAmountException("Unit price or item quantity cannot be zero");
-        }
-        }
-        return null;
-    }
 
     @Override
     public void deleteAllOrderItemsByOrderId(List<Order>orders) throws Exception {
+        PreparedStatement ps = null;
+        Connection conn = null;
         try{
             conn=getConnection();
             ps=conn.prepareStatement(Sql.DELETE_ITEMS_BY_ORDER_ID);
@@ -179,6 +177,36 @@ public class OrderItemServiceImpl extends AbstractService implements OrderItemSe
 
         }finally {
             close(ps,conn);
+        }
+    }
+    @Override
+    public List<OrderItem> getOrderItemsByStoreId(int id) throws Exception{
+        OrderService orderService = new OrderServiceImpl();
+        PreparedStatement ps = null;
+        Connection conn = null;
+        ResultSet rs = null;
+        List<OrderItem>orderItems = new ArrayList<>();
+        try{
+
+        for(int i =0;i<orderService.ordersByStore(id).toArray().length;i++){
+            conn=getConnection();
+            ps=conn.prepareStatement(Sql.GET_BY_ORDER_ID);
+            ps.setInt(1, orderService.ordersByStore(id).get(i).getId());
+            rs = ps.executeQuery();
+            while (rs.next()){
+             OrderItem orderitem = new OrderItem();
+             orderitem.setId(rs.getInt("id"));
+             orderitem.setOrder_id(rs.getInt("order_id"));
+             orderitem.setProduct_id(rs.getInt("product_id"));
+             orderitem.setProduct(productService.getProductById(rs.getInt("product_id")));
+             orderitem.setQuantity(rs.getInt("quantity"));
+             orderitem.setUnit_price(rs.getBigDecimal("unit_price"));
+             orderItems.add(orderitem);
+
+            }
+        }return orderItems;
+        }finally {
+            close(rs,ps,conn);
         }
     }
 

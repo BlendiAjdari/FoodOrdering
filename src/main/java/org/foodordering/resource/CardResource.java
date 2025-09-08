@@ -36,23 +36,6 @@ public class CardResource extends AbstractResource {
         return Response.ok(gson().toJson(cards)).build();
     }
     @GET
-    @Path("/check")
-    @Consumes(MediaType.APPLICATION_JSON)
-    public Response getCardChecked(){
-        return Response.ok("Post your Card number and CVV to confirm").build();
-    }
-    @POST
-    @Path("/check")
-    @Consumes(MediaType.APPLICATION_JSON)
-    @Produces(MediaType.APPLICATION_JSON)
-    public Response checkCard(String payload) throws Exception {
-        Card card = gson().fromJson(payload,Card.class);
-        card.setCardNumber(card.getCardNumber());
-        card.setCardVerificationValue(card.getCardVerificationValue());
-        cardService.cardCheck(card);
-        return Response.ok(gson().toJson("Payment done successfully!")).build();
-    }
-    @GET
     @Path("/{id}")
     @Consumes(MediaType.APPLICATION_JSON)
     public Response getCardById(@PathParam("id") int id) throws Exception {
@@ -76,10 +59,11 @@ public class CardResource extends AbstractResource {
 
     }
     @DELETE
+    @Path("/delete")
     @Consumes(MediaType.APPLICATION_JSON)
     public Response deleteCardById(Card card) throws Exception {
         cardService.deleteCard(card);
-        return Response.ok().build();
+        return Response.ok("Delete").build();
     }
 
 }

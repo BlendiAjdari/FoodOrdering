@@ -10,12 +10,13 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class CourierServiceImpl extends AbstractService implements CourierService{
-    PreparedStatement ps=null;
-    ResultSet rs=null;
-    Connection conn=null;
+
 
     @Override
     public List<Courier> getAllCouriers() throws Exception {
+        PreparedStatement ps = null;
+        Connection conn = null;
+        ResultSet rs = null;
         try{
             conn=getConnection();
             ps = conn.prepareStatement(Sql.GET_ALL_COURIERS);
@@ -42,6 +43,8 @@ public class CourierServiceImpl extends AbstractService implements CourierServic
         if(validate != null){
             throw new Exception(validate);
         }
+        PreparedStatement ps = null;
+        Connection conn = null;
         try{
             conn=getConnection();
             ps = conn.prepareStatement(Sql.SAVE_COURIER);
@@ -62,6 +65,8 @@ public class CourierServiceImpl extends AbstractService implements CourierServic
         if(validate != null){
             throw new Exception(validate);
         }
+        PreparedStatement ps = null;
+        Connection conn = null;
         try{
             conn=getConnection();
             ps = conn.prepareStatement(Sql.UPDATE_COURIER);
@@ -78,6 +83,8 @@ public class CourierServiceImpl extends AbstractService implements CourierServic
 
     @Override
     public void deleteCourier(Courier courier) throws Exception {
+        PreparedStatement ps = null;
+        Connection conn = null;
         try {
             conn=getConnection();
             ps = conn.prepareStatement(Sql.DELETE_COURIER);
@@ -91,6 +98,9 @@ public class CourierServiceImpl extends AbstractService implements CourierServic
 
     @Override
     public Courier getCourierById(int id) throws Exception {
+        PreparedStatement ps = null;
+        Connection conn = null;
+        ResultSet rs = null;
         try {
             conn=getConnection();
             ps = conn.prepareStatement(Sql.GET_COURIER_BY_ID);

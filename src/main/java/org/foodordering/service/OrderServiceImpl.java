@@ -134,39 +134,6 @@ public class OrderServiceImpl extends AbstractService implements OrderService {
         }
     }
     @Override
-    public int getCustomerIdFromCart() throws Exception {
-        Connection conn = null;
-        PreparedStatement ps = null;
-        ResultSet rs = null;
-        try {
-            conn = getConnection();
-            ps = conn.prepareStatement(Sql.GET_CUSTOMER_ID_FROM_CART);
-            rs = ps.executeQuery();
-            if(rs.next()){
-                return rs.getInt("id");
-            }
-        }finally {
-            close(rs, ps, conn);
-        }return 0;
-    }
-    @Override
-    public int StoreIdFromProduct(int id) throws Exception{
-        PreparedStatement ps = null;
-        Connection conn = null;
-        ResultSet rs = null;
-        try {
-            conn = getConnection();
-            ps = conn.prepareStatement(Sql.GET_STOREID_FROM_PRODUCT_ID);
-            ps.setInt(1, id);
-            rs = ps.executeQuery();
-            if(rs.next()){
-                return rs.getInt("store_id");
-            }return 0;
-        }finally {
-            close(rs, ps, conn);
-        }
-    }
-    @Override
     public BigDecimal totalAmount(int id) throws Exception{
         PreparedStatement ps = null;
         ResultSet rs = null;
@@ -180,7 +147,8 @@ public class OrderServiceImpl extends AbstractService implements OrderService {
             if(rs.next()){
 
 
-                return new BigDecimal(rs.getInt("quantity")).multiply(rs.getBigDecimal("unit_price"));
+                BigDecimal n=new BigDecimal(rs.getInt("quantity")).multiply(rs.getBigDecimal("unit_price"));
+                return n.add(n.multiply(BigDecimal.valueOf(0.18)));
             }
         }finally {
             close(rs, ps, conn);
@@ -378,8 +346,6 @@ public class OrderServiceImpl extends AbstractService implements OrderService {
         final static String GET_AMOUNT = "SELECT amount FROM orders WHERE id =?";
         final static String UPDATE_AMOUNT = "UPDATE orders SET amount=? WHERE id=?";
         final static String GET_ORDER_ITEM_FROM_ORDER_ID ="SELECT quantity,unit_price FROM order_item WHERE ORDER_ID = ? ORDER BY id DESC LIMIT 1";
-        final static String GET_STOREID_FROM_PRODUCT_ID ="SELECT store_id FROM products WHERE id = ?";
-        final static String GET_CUSTOMER_ID_FROM_CART ="SELECT id FROM orders WHERE Costumers_id =(SELECT costumer_id FROM cart)";
         final static String GET_ALL_ORDERS = "select * from orders";
         final static String GET_ORDER_BY_ID = "select * from orders where id=?";
         final static String SAVE_ORDER = "INSERT INTO orders Values(?,?,?,?,?,?)";

@@ -55,9 +55,10 @@ public class EwalletResource extends AbstractResource {
         return Response.ok(gson().toJson(ewallet)).build();
     }
     @DELETE
+    @Path("/delete")
     @Consumes(MediaType.APPLICATION_JSON)
     public Response deleteEwallet(Ewallet ewallet) throws Exception {
         ewalletService.deleteEwallet(ewallet);
-        return Response.ok().build();
+        return Response.ok("Deleted").build();
     }
 }

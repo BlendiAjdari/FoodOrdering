@@ -7,7 +7,7 @@ import java.math.BigDecimal;
 
 
 public class CartItem extends AbstractEntity {
-    @SerializedName("c_id")
+    @SerializedName("cart_id")
     private int cart_id;
     @SerializedName("p_id")
     private int product_id;

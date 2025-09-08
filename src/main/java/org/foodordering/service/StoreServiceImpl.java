@@ -33,7 +33,7 @@ public class StoreServiceImpl extends AbstractService implements StoreService {
             ps.setTime(7, store.getCloses());
             ps.executeUpdate();
         } finally {
-            close(ps, con); //using method from AbstractService
+            close(ps, con);
         }
     }
 

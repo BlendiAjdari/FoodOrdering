@@ -83,6 +83,10 @@ public class EwalletServiceImpl extends AbstractService implements EwalletServic
 
     @Override
     public void updateEwallet(Ewallet e) throws Exception {
+        String validate = e.validate();
+        if(validate != null) {
+            throw new Exception(validate);
+        }
         PreparedStatement ps = null;
         Connection conn = null;
         try {
