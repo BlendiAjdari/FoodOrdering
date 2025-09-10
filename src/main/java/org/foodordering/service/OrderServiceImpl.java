@@ -148,7 +148,7 @@ public class OrderServiceImpl extends AbstractService implements OrderService {
 
 
                 BigDecimal n=new BigDecimal(rs.getInt("quantity")).multiply(rs.getBigDecimal("unit_price"));
-                return n.add(n.multiply(BigDecimal.valueOf(0.18)));
+                return n.add(n.multiply(BigDecimal.valueOf(0.10)));
             }
         }finally {
             close(rs, ps, conn);

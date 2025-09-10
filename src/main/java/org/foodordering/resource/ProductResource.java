@@ -53,7 +53,7 @@ public class ProductResource extends AbstractResource {
     @Produces(MediaType.APPLICATION_JSON)
     public Response updateProduct(@PathParam("id") int id ,String payload) throws Exception{
         Product product = gson().fromJson(payload,Product.class);
-        product.setId( product.getId());
+        product.setId( id);
         product.setName( product.getName());
         product.setDescription( product.getDescription());
         product.setPrice(product.getPrice());

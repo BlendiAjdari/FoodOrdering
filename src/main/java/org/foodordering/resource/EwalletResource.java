@@ -27,6 +27,7 @@ public class EwalletResource extends AbstractResource {
     @Produces(MediaType.APPLICATION_JSON)
     public Response insertEwallet(String payload) throws Exception {
         Ewallet ewallet = gson().fromJson(payload, Ewallet.class);
+        ewallet.setId(ewallet.getId());
         ewallet.setUsername(ewallet.getUsername());
         ewallet.setPassword(ewallet.getPassword());
         ewallet.setCard_id(ewallet.getCard_id());

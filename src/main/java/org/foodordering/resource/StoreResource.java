@@ -59,7 +59,7 @@ public class StoreResource extends AbstractResource {
     @Produces(MediaType.APPLICATION_JSON)
     public Response putStore(@PathParam("id") int id,String payload) throws Exception {
         Store store = gson().fromJson(payload,Store.class);
-        store.setId(store.getId());
+        store.setId(id);
         store.setName(store.getName());
         store.setAddress(store.getAddress());
         store.setContact(store.getContact());

@@ -31,6 +31,7 @@ public class CartResource extends AbstractResource {
     @Consumes(MediaType.APPLICATION_JSON)
     public Response createCart(String payload) throws Exception {
         Cart cart = gson().fromJson(payload, Cart.class);
+        cart.setId(cart.getId());
         cart.setCustomer_id(cart.getCustomer_id());
         cart.setCreated_at(Time.valueOf(LocalTime.now()));
         cartService.addCart(cart);
@@ -49,7 +50,7 @@ public class CartResource extends AbstractResource {
     @Consumes(MediaType.APPLICATION_JSON)
     public Response putCart(@PathParam("id") int id,String payload) throws Exception {
         Cart cart = gson().fromJson(payload, Cart.class);
-        cart.setCustomer_id(id);
+        cart.setId(id);
         cart.setCustomer( cart.getCustomer() );
         cart.setCreated_at(cart.getCreated_at());
         cartService.updateCart(cart);
@@ -60,7 +61,7 @@ public class CartResource extends AbstractResource {
     @Produces(MediaType.APPLICATION_JSON)
     public Response deleteCarts(Cart cart) throws Exception {
         cartService.deleteCart(cart);
-        return  Response.ok("Delete").build();
+        return  Response.ok("Deleted").build();
     }
     @GET
     @Path("/{id}")

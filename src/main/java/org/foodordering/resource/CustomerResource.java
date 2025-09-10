@@ -24,6 +24,7 @@ public class CustomerResource extends AbstractResource {
     @Consumes(MediaType.APPLICATION_JSON)
     public Response saveCostumer(String payload) throws  Exception {
        Customer customer = gson().fromJson(payload,Customer.class);
+       customer.setId(customer.getId());
        customer.setName(customer.getName());
        customer.setEmail(customer.getEmail());
        customer.setPhone(customer.getPhone());
