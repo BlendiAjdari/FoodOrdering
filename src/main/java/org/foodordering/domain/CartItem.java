@@ -24,11 +24,6 @@ public class CartItem extends AbstractEntity {
     }
 
 
-
-
-
-
-
     public int getCart_id() {
         return cart_id;
     }

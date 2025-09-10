@@ -72,8 +72,9 @@ public class OrderItemServiceImpl extends AbstractService implements OrderItemSe
         if(validate != null){
             throw new Exception(validate);
         }
+        ProductService productService=new ProductServiceImpl();
         OrderService orderService = new OrderServiceImpl();
-        orderService.amountChange(orderItem.getOrder_id());
+
         try {
             conn = getConnection();
             ps = conn.prepareStatement(Sql.UPDATE_ORDERED_ITEMS);
@@ -82,7 +83,9 @@ public class OrderItemServiceImpl extends AbstractService implements OrderItemSe
              ps.setInt(3, orderItem.getQuantity());
              ps.setBigDecimal(4, orderItem.getUnit_price());
              ps.setInt(5, orderItem.getId());
+             productService.stockChanges(productService.getProductById(orderItem.getProduct_id()),orderItem);
              ps.executeUpdate();
+             orderService.amountChange(orderItem.getOrder_id());
 
 
         }finally {

@@ -74,9 +74,14 @@ public class CheckoutServiceImpl extends AbstractService implements CheckoutServ
                 List<Order>orders=orderService.getOrdersByCustomerId(rs.getInt("customer_id"));
                 checkout.setOrders(orders);
 
-                List<OrderItem>orderItems=orderItemService.getOrderItemsByOrderId(orders.getFirst().getId());
+                List<OrderItem> allOrderItems = new ArrayList<>();
 
-                checkout.setOrderItems(orderItems);
+                for (Order order : orders) {
+                    List<OrderItem> items = orderItemService.getOrderItemsByOrderId(order.getId());
+                    allOrderItems.addAll(items);
+                }
+
+                checkout.setOrderItems(allOrderItems);
 
                 return checkout;
 

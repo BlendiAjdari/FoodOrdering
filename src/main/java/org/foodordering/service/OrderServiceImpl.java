@@ -159,7 +159,6 @@ public class OrderServiceImpl extends AbstractService implements OrderService {
     public void amountChange(int id) throws Exception{
         PreparedStatement ps = null;
         Connection conn = null;
-        ResultSet rs = null;
         try {
             conn= getConnection();
             ps = conn.prepareStatement(Sql.UPDATE_AMOUNT);
@@ -323,22 +322,6 @@ public class OrderServiceImpl extends AbstractService implements OrderService {
         }
     }
 
-    public int orderIdFromCustomerId(int id) throws Exception {
-         PreparedStatement ps =null;
-         ResultSet rs=null;
-         Connection conn=null;
-         try {
-             conn = getConnection();
-             ps = conn.prepareStatement(Sql.GET_ORDER_ID_FROM_CUSTOMER_ID);
-             rs=ps.executeQuery();
-             if(rs.next()){
-                 return rs.getInt("order_id");
-             }
-         }finally {
-             close(rs, ps, conn);
-         }return 0;
-    }
-
 
     public static class Sql{
         final static String GET_AMOUNT = "SELECT amount FROM orders WHERE id =?";
@@ -353,7 +336,6 @@ public class OrderServiceImpl extends AbstractService implements OrderService {
         final static String GET_AMOUNT_FROM_CUSTOMER_ID="SELECT amount FROM orders WHERE Costumers_id=?";
         final static String DELETE_ORDER_FROM_CUSTOMER_ID = "DELETE FROM orders WHERE Costumers_id=?";
         final static String GET_ORDERS_FROM_CUSTOMER_ID="SELECT * FROM orders WHERE Costumers_id=?";
-        final static String GET_ORDER_ID_FROM_CUSTOMER_ID="SELECT id FROM orders WHERE Costumers_id=?";
         final static String GET_ORDERS_BY_STORE_ID="SELECT * FROM orders WHERE store_id=?";
     }
 }
